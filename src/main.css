@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #9C5235;
+  --color-primary-hover: #86442b;
+  --color-cream: #FFFBF2;
+  --color-text-main: #1A1A1A;
+
+  --font-sans: "Outfit", sans-serif;
+  --font-serif: "Playfair Display", serif;
+}
+
+body {
+  background-color: var(--color-cream);
+  color: var(--color-text-main);
+  font-family: var(--font-sans);
+}
