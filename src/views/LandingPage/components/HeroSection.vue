@@ -14,10 +14,17 @@ const landingDesktopPoster = '/landing_desktop_poster.jpg'
 const { t } = useI18n()
 const audioStore = useAudioStore()
 
-const isMobile = ref(false)
+const isMobile = ref(typeof window !== 'undefined' ? window.innerWidth < 768 : false)
+const isVideoLoaded = ref(false)
 
 const checkMobile = () => {
-  isMobile.value = window.innerWidth < 768
+  if (typeof window !== 'undefined') {
+    isMobile.value = window.innerWidth < 768
+  }
+}
+
+const handleVideoLoad = () => {
+  isVideoLoaded.value = true
 }
 
 onMounted(() => {
@@ -35,18 +42,33 @@ onUnmounted(() => {
     <!-- Main Video/Image Container -->
     <div
       class="relative w-full max-w-[500px] md:max-w-[900px] aspect-square md:aspect-video rounded-3xl overflow-hidden shadow-xl bg-gray-200">
-      <!-- Mobile Video -->
-      <video v-if="isMobile" key="mobile" class="absolute inset-0 w-full h-full object-cover" :src="landingVideo"
+
+      <!-- Poster Image (Bottom Layer) -->
+      <img :src="isMobile ? landingPoster : landingDesktopPoster"
+        class="absolute inset-0 w-full h-full object-cover z-0" alt="Hero Poster" />
+
+      <!-- Mobile Video (Middle Layer) -->
+      <video v-if="isMobile" key="mobile"
+        class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 z-10"
+        :class="{ 'opacity-0': !isVideoLoaded, 'opacity-100': isVideoLoaded }" :src="landingVideo"
         :poster="landingPoster" autoplay loop muted playsinline crossorigin="anonymous" preload="auto"
-        fetchpriority="high"></video>
+        fetchpriority="high" @loadeddata="handleVideoLoad" @canplay="handleVideoLoad"></video>
 
-      <!-- Desktop Video -->
-      <video v-else key="desktop" class="absolute inset-0 w-full h-full object-cover object-top scale-[1.02]"
-        :src="landingVideoDesktop" :poster="landingDesktopPoster" autoplay loop muted playsinline
-        crossorigin="anonymous" preload="auto" fetchpriority="high"></video>
+      <!-- Desktop Video (Middle Layer) -->
+      <video v-else key="desktop"
+        class="absolute inset-0 w-full h-full object-cover object-top scale-[1.02] transition-opacity duration-500 z-10"
+        :class="{ 'opacity-0': !isVideoLoaded, 'opacity-100': isVideoLoaded }" :src="landingVideoDesktop"
+        :poster="landingDesktopPoster" autoplay loop muted playsinline crossorigin="anonymous" preload="auto"
+        fetchpriority="high" @loadeddata="handleVideoLoad" @canplay="handleVideoLoad"></video>
 
-      <!-- Listen Button Overlay -->
-      <div class="absolute bottom-6 right-6">
+      <!-- Loading Spinner (Top Layer) -->
+      <div v-if="!isVideoLoaded"
+        class="absolute inset-0 z-20 flex items-center justify-center bg-black/10 backdrop-blur-[2px]">
+        <div class="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+      </div>
+
+      <!-- Listen Button Overlay (Highest Layer) -->
+      <div class="absolute bottom-6 right-6 z-30">
         <button @click="audioStore.toggle('hero', songUrl)"
           class="flex items-center gap-3 bg-white/90 hover:bg-white backdrop-blur-md px-5 py-2.5 rounded-full shadow-lg transition-all cursor-pointer group">
           <div
