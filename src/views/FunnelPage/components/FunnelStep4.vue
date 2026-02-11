@@ -35,7 +35,7 @@ const handleNext = () => {
                 {{ t('funnel.step4.question') }}
             </label>
             <textarea v-model="store.answers.memories" :placeholder="t('funnel.step4.placeholder')" rows="6"
-                class="w-full px-6 py-4 rounded-xl border-2 border-[#E5E0D6] focus:border-[#B2542B] focus:ring-0 outline-none text-lg transition-colors placeholder:text-gray-400 bg-white resize-none"
+                class="w-full px-6 py-4 rounded-xl border-2 border-[#E5E0D6] focus:border-secondary focus:ring-0 outline-none text-lg transition-colors placeholder:text-gray-400 bg-white resize-none"
                 @input="store.setMemories(($event.target as HTMLTextAreaElement).value)"></textarea>
         </div>
 
@@ -51,7 +51,7 @@ const handleNext = () => {
             </button>
 
             <button @click="handleNext"
-                class="px-10 py-3 rounded-xl bg-[#B2542B] text-white font-bold hover:bg-[#964623] transition-all flex items-center gap-2 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                class="px-10 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary-hover transition-all flex items-center gap-2 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 :disabled="!isValid">
                 {{ t('funnel.navigation.next') }}
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"

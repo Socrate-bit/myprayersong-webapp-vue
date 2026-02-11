@@ -1,15 +1,101 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="">
   <head>
-    <meta charset="UTF-8">
-    <link rel="icon" href="/favicon.ico">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PrayerSong</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon_io/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon_io/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon_io/favicon-16x16.png" />
+    <link rel="manifest" href="/favicon_io/site.webmanifest" />
+    <link rel="icon" href="/favicon_io/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CançãoOração</title>
+
+    <!-- Preconnect to Firebase Storage -->
+    <!-- <link rel="preconnect" href="https://firebasestorage.googleapis.com" /> -->
+
+    <!-- Preload Hero Videos -->
+    <!-- <link
+      rel="preload"
+      as="video"
+      href="/video_landing.mp4"
+      media="(max-width: 767px)"
+      fetchpriority="high"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="preload"
+      as="video"
+      href="/video_landing_desktop.mp4"
+      media="(min-width: 768px)"
+      fetchpriority="high"
+      crossorigin="anonymous"
+    /> -->
+
+    <!-- Preload Hero Poster Images -->
+    <link
+      rel="preload"
+      as="image"
+      href="/landing_mobile_poster.jpg"
+      media="(max-width: 767px)"
+      fetchpriority="high"
+    />
+    <link
+      rel="preload"
+      as="image"
+      href="/landing_desktop_poster.jpg"
+      media="(min-width: 768px)"
+      fetchpriority="high"
+    />
+    <link rel="preload" as="image" href="/En-tête.png" fetchpriority="high" />
+
+    <link
+      rel="preload"
+      href="/fonts/montserrat-v31-latin_latin-ext-500.woff2"
+      as="font"
+      type="font/woff2"
+      fetchpriority="highest"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/montserrat-v31-latin_latin-ext-600.woff2"
+      as="font"
+      type="font/woff2"
+      fetchpriority="highest"
+      crossorigin
+    />
+
+    <!-- Meta Pixel Code -->
+    <script>
+      !(function (f, b, e, v, n, t, s) {
+        if (f.fbq) return
+        n = f.fbq = function () {
+          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+        }
+        if (!f._fbq) f._fbq = n
+        n.push = n
+        n.loaded = !0
+        n.version = '2.0'
+        n.queue = []
+        t = b.createElement(e)
+        t.async = !0
+        t.src = v
+        s = b.getElementsByTagName(e)[0]
+        s.parentNode.insertBefore(t, s)
+      })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js')
+      fbq('init', '2304283430080406')
+    </script>
+
+    <!-- End Meta Pixel Code -->
   </head>
   <body>
+    <noscript
+      ><img
+        height="1"
+        width="1"
+        style="display: none"
+        src="https://www.facebook.com/tr?id=2304283430080406&ev=PageView&noscript=1"
+    /></noscript>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>

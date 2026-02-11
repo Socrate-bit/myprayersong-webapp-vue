@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app'
 import { getFirestore } from 'firebase/firestore'
 import { getAnalytics } from 'firebase/analytics'
+import { connectFunctionsEmulator, getFunctions } from 'firebase/functions'
 
 const firebaseConfig = {
   apiKey: 'AIzaSyC_F2YeKhSCc9mAst_9nR-7MCrfSZ4jfsY',
@@ -15,5 +16,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig)
 const db = getFirestore(app)
 const analytics = getAnalytics(app)
+const functions = getFunctions(app)
 
-export { app, db, analytics }
+if (location.hostname === "localhost") {
+  connectFunctionsEmulator(functions, "localhost", 5001);
+}
+
+// Helper to construct public Firebase Storage URL
+const getStorageUrl = (folder: string, filename: string) => {
+  const bucket = firebaseConfig.storageBucket
+  const path = `${folder}/${filename}`
+  return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(path)}?alt=media`
+}
+
+export { app, db, analytics, functions, getStorageUrl }
