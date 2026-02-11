@@ -54,11 +54,3 @@ const goToHome = () => {
     </div>
   </div>
 </template>
-
-<style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap');
-
-.font-outfit {
-  font-family: 'Outfit', sans-serif;
-}
-</style>

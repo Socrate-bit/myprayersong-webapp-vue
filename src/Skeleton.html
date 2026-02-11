@@ -1,0 +1,174 @@
+<style>
+  .skeleton-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: #ffffff;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    font-family:
+      'Montserrat',
+      system-ui,
+      -apple-system,
+      sans-serif;
+    overflow: hidden;
+  }
+
+  /* Header specific styles matching AppHeader.vue */
+  .skeleton-header {
+    background-color: #0277bc; /* --color-secondary */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    flex-shrink: 0;
+  }
+
+  .skeleton-header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px 16px; /* py-5 px-4 */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 88px; /* 48px logo + 40px padding */
+    box-sizing: border-box;
+  }
+
+  .skeleton-logo {
+    width: 180px;
+    height: 48px; /* h-12 */
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+  }
+
+  .skeleton-nav-desktop {
+    display: none;
+  }
+
+  .skeleton-menu-icon {
+    width: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 20px;
+  }
+
+  .skeleton-menu-bar {
+    width: 100%;
+    height: 2px;
+    background-color: white;
+    border-radius: 2px;
+  }
+
+  @media (min-width: 768px) {
+    .skeleton-nav-desktop {
+      display: flex;
+      align-items: center;
+      gap: 32px; /* gap-8 */
+    }
+    .skeleton-menu-icon {
+      display: none;
+    }
+    .skeleton-link {
+      width: 80px;
+      height: 16px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+    .skeleton-btn {
+      width: 160px;
+      height: 46px; /* px-6 py-2.5 ~= 46px height */
+      background-color: #fbc128; /* --color-primary */
+      border-radius: 8px; /* rounded-lg */
+    }
+  }
+
+  /* Hero specific styles matching HeroSection.vue */
+  .skeleton-hero {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 64px; /* pt-16 */
+    padding-left: 16px; /* px-4 */
+    padding-right: 16px; /* px-4 */
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .skeleton-video-wrapper {
+    width: 100%;
+    max-width: 500px; /* Mobile max-width */
+    aspect-ratio: 1 / 1; /* aspect-square */
+    background-color: #e5e7eb; /* gray-200 */
+    border-radius: 24px; /* rounded-3xl */
+    box-shadow:
+      0 20px 25px -5px rgba(0, 0, 0, 0.1),
+      0 10px 10px -5px rgba(0, 0, 0, 0.04); /* shadow-xl */
+    position: relative;
+    overflow: hidden;
+  }
+
+  @media (min-width: 768px) {
+    .skeleton-video-wrapper {
+      max-width: 900px; /* md:max-w-[900px] */
+      aspect-ratio: 16 / 9; /* md:aspect-video */
+    }
+  }
+
+  /* Shimmer Animation */
+  .shimmer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.4) 50%,
+      transparent 100%
+    );
+    transform: translateX(-100%);
+    animation: shimmer 1.5s infinite linear;
+  }
+
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+</style>
+
+<div class="skeleton-loader">
+  <header class="skeleton-header">
+    <div class="skeleton-header-inner">
+      <div class="skeleton-logo">
+        <div class="shimmer"></div>
+      </div>
+
+      <!-- Mobile Menu Icon -->
+      <div class="skeleton-menu-icon">
+        <div class="skeleton-menu-bar"></div>
+        <div class="skeleton-menu-bar"></div>
+        <div class="skeleton-menu-bar"></div>
+      </div>
+
+      <!-- Desktop Nav -->
+      <div class="skeleton-nav-desktop">
+        <div class="skeleton-link"><div class="shimmer"></div></div>
+        <div class="skeleton-link"><div class="shimmer"></div></div>
+        <div class="skeleton-link"><div class="shimmer"></div></div>
+        <div class="skeleton-btn"><div class="shimmer"></div></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="skeleton-hero">
+    <div class="skeleton-video-wrapper">
+      <div class="shimmer"></div>
+    </div>
+  </main>
+</div>
