@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { ref, onMounted, onUnmounted, computed, type ComponentPublicInstance } from 'vue'
+import { ref, onMounted, onUnmounted, onDeactivated, computed, watch, type ComponentPublicInstance } from 'vue'
 import { reviews } from '@/views/ReviewsPage/testimony'
-import { getStorageUrl } from '@/services/firebase'
 import { SITE_NAME } from '@/constants'
+import { useAudioStore } from '@/stores/audio'
 
-const defaultSongUrl = getStorageUrl('songs', 'Exemple1.mp3')
+
 
 const { t } = useI18n()
+const audioStore = useAudioStore()
 
 interface CarouselItem {
   id: string | number
@@ -83,7 +84,6 @@ const currentIndex = ref(0) // Track logical index for dots
 
 // Playback state
 const activeIndex = ref<number | null>(null)
-const currentAudio = ref<HTMLAudioElement | null>(null)
 const videoMap = ref<Map<number, HTMLVideoElement>>(new Map())
 
 const setVideoRef = (el: Element | ComponentPublicInstance | null, index: number) => {
@@ -158,13 +158,15 @@ const prev = () => {
   scrollToIndex(currentIndex.value)
 }
 
+
+
 const playVideo = async (index: number) => {
   stopPlayback() // Stop any current
+  audioStore.pause() // Stop any background audio
 
   if (!testimonials.value[index]) return
 
   activeIndex.value = index
-  const item = testimonials.value[index]
   const vid = videoMap.value.get(index)
 
   // 1. Play Video
@@ -176,24 +178,7 @@ const playVideo = async (index: number) => {
       await new Promise(resolve => setTimeout(resolve, 50))
     }
     vid.play().catch(e => console.error("Video play error:", e))
-  }
 
-  // 2. Play Audio (Synced logic from ReviewCard.vue)
-  const audioSrc = item.songUrl || defaultSongUrl
-  const audio = new Audio(audioSrc)
-  audio.preload = 'auto'
-  currentAudio.value = audio
-
-  // If video (MP4), skip to 15s
-  if (item.mediaUrl?.toLowerCase().includes('.mp4')) {
-    audio.currentTime = 15
-  }
-
-  audio.play().catch(e => console.error("Audio play error:", e))
-
-  // Sync end
-  audio.onended = onVideoEnded
-  if (vid) {
     vid.onended = onVideoEnded
   }
 }
@@ -204,17 +189,31 @@ const stopPlayback = () => {
     const vid = videoMap.value.get(activeIndex.value)
     if (vid) vid.pause()
   }
-  // Stop Audio
-  if (currentAudio.value) {
-    currentAudio.value.pause()
-    currentAudio.value = null
-  }
   activeIndex.value = null
 }
 
+// Update onVideoEnded to reset buffering
 const onVideoEnded = () => {
   stopPlayback()
+  isBuffering.value = false
 }
+
+const isBuffering = ref(false)
+
+const onWaiting = () => {
+  isBuffering.value = true
+}
+
+const onPlaying = () => {
+  isBuffering.value = false
+}
+
+// Stop carousel video if global audio starts playing
+watch(() => audioStore.isPlaying, (isPlaying) => {
+  if (isPlaying) {
+    stopPlayback()
+  }
+})
 
 onMounted(() => {
   scrollContainer.value?.addEventListener('scroll', updateCurrentIndexOnScroll, { passive: true })
@@ -226,13 +225,15 @@ onMounted(() => {
         const index = elementIndexMap.get(entry.target)
         if (index !== undefined) {
           loadedVideos.value.add(index)
-          // We could also preload audio here if we wanted, but there are many items.
-          // Let's stick to video preload='auto' change.
           observer?.unobserve(entry.target)
         }
       }
     })
   }, { root: null, threshold: 0.1, rootMargin: '200px' }) // Add rootMargin to start loading before it enters viewport
+})
+
+onDeactivated(() => {
+  stopPlayback()
 })
 
 onUnmounted(() => {
@@ -242,15 +243,21 @@ onUnmounted(() => {
     observer.disconnect()
     observer = null
   }
+  // Cleanup
 })
+const getStarType = (rating: number = 0, index: number) => {
+  if (rating >= index) return 'full'
+  if (rating >= index - 0.5) return 'half'
+  return 'empty'
+}
 </script>
 
 <template>
-  <section class="py-12 bg-cream overflow-hidden">
+  <section class="py-6 md:py-12 bg-cream overflow-hidden">
     <!-- Title -->
-    <div class="max-w-7xl mx-auto px-4 mb-10">
-      <h2 class="font-serif text-2xl md:text-3xl font-bold text-center text-text-main">
-        {{ t('testimonials.title') }}
+    <div class="max-w-7xl mx-auto px-4 mb-6 md:mb-10">
+      <h2 class="font-serif text-xl md:text-3xl font-bold text-center text-text-main">
+        {{ t('testimonials.title', { siteName: SITE_NAME }) }}
       </h2>
     </div>
 
@@ -284,8 +291,8 @@ onUnmounted(() => {
         class="flex gap-5 overflow-x-auto snap-x snap-mandatory pb-6 px-4 scrollbar-hide md:px-12 items-stretch"
         style="scrollbar-width: none; -ms-overflow-style: none;">
         <div v-for="(item, index) in testimonials" :key="item.id" :ref="(el) => observeCard(el, index)"
-          class="snap-center shrink-0 w-[63vw] max-w-[330px] flex flex-col rounded-2xl overflow-hidden shadow-lg border border-gray-100 bg-white h-[375px]"
-          :class="{ 'bg-black': item.type === 'video' || item.type === 'image' }">
+          class="snap-center shrink-0 w-[63vw] max-w-[330px] flex flex-col rounded-2xl overflow-hidden shadow-lg h-[375px]"
+          :class="['video', 'image'].includes(item.type) ? 'bg-black border-none' : 'bg-white border border-gray-100'">
 
           <!-- VIDEO/IMAGE CARD -->
           <div v-if="item.type === 'video' || item.type === 'image'" class="relative w-full h-full group">
@@ -293,8 +300,17 @@ onUnmounted(() => {
             <video v-if="item.type === 'video' && item.mediaUrl?.toLowerCase().includes('.mp4')"
               :ref="(el) => setVideoRef(el, index)" :src="loadedVideos.has(index) ? item.mediaUrl : undefined"
               class="w-full h-full object-cover object-top scale-[1.02]" playsinline
-              :preload="loadedVideos.has(index) ? 'auto' : 'none'" :poster="item.poster" @click="stopPlayback"></video>
-            <img v-else :src="item.mediaUrl" class="w-full h-full object-cover object-top scale-[1.02]" />
+              :preload="loadedVideos.has(index) ? 'auto' : 'metadata'" :poster="item.poster" @click="stopPlayback"
+              @waiting="onWaiting" @playing="onPlaying"></video>
+
+            <!-- Video Loading Spinner -->
+            <div v-if="item.type === 'video' && activeIndex === index && isBuffering"
+              class="absolute inset-0 z-20 flex items-center justify-center bg-black/10 backdrop-blur-[2px] pointer-events-none">
+              <div class="w-10 h-10 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+            </div>
+
+            <img v-if="item.type === 'image'" :src="item.mediaUrl"
+              class="w-full h-full object-cover object-top scale-[1.02]" />
 
             <!-- Overlay (Only for Video) -->
             <div v-if="item.type === 'video' && activeIndex !== index" @click.stop="playVideo(index)"
@@ -328,13 +344,31 @@ onUnmounted(() => {
             </div>
 
             <!-- Stars -->
-            <div class="flex gap-1 mb-5">
-              <svg v-for="i in 5" :key="i" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                class="w-4 h-4" :class="i <= (item.rating || 0) ? 'text-yellow-400' : 'text-gray-200'">
-                <path fill-rule="evenodd"
-                  d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                  clip-rule="evenodd" />
-              </svg>
+            <div class="flex gap-0.5 mb-5 text-yellow-400">
+              <div v-for="i in 5" :key="i" class="relative w-4 h-4">
+                <!-- Background (Empty Star) -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                  class="w-4 h-4 text-gray-200">
+                  <path fill-rule="evenodd"
+                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                    clip-rule="evenodd" />
+                </svg>
+                <!-- Foreground (Full Star) -->
+                <svg v-if="getStarType(item.rating, i) === 'full'" class="absolute inset-0 w-4 h-4 fill-current"
+                  viewBox="0 0 24 24">
+                  <path fill-rule="evenodd"
+                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                    clip-rule="evenodd" />
+                </svg>
+                <!-- Foreground (Half Star) -->
+                <div v-if="getStarType(item.rating, i) === 'half'" class="absolute inset-0 w-2 h-4 overflow-hidden">
+                  <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                    <path fill-rule="evenodd"
+                      d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                      clip-rule="evenodd" />
+                  </svg>
+                </div>
+              </div>
             </div>
 
             <!-- Content -->
@@ -379,7 +413,7 @@ onUnmounted(() => {
       <div class="flex justify-center mt-10">
         <router-link to="/reviews"
           class="inline-flex items-center justify-center px-8 py-3 text-base font-bold text-white bg-secondary rounded-full hover:bg-opacity-90 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-          {{ t('reviewsPage.hero.title') }}
+          {{ t('testimonials.seeMore') }}
         </router-link>
       </div>
 

@@ -6,12 +6,10 @@ const activeReviewId = ref<number | null>(null)
 </script>
 
 <script setup lang="ts">
-import { computed, watch, onUnmounted } from 'vue'
+import { computed, watch, onUnmounted, onDeactivated } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { getStorageUrl } from '@/services/firebase'
 import { useIntersectionObserver } from '@/composables/useIntersectionObserver'
-
-const songUrl = getStorageUrl('songs', 'Exemple1.mp3')
+const songUrl = '/songs/Exemple1.mp3'
 
 const { t } = useI18n()
 
@@ -44,7 +42,7 @@ const isPlaying = computed(() => activeReviewId.value === props.review.id)
 
 // Ref for the card element to observe
 const cardRef = ref<HTMLElement | null>(null)
-const { isIntersecting } = useIntersectionObserver(cardRef)
+const { isIntersecting } = useIntersectionObserver(cardRef, { rootMargin: '200px' })
 const hasloaded = ref(false)
 
 let audio: HTMLAudioElement | null = null
@@ -55,13 +53,9 @@ watch(isIntersecting, (val) => {
 
 // Initialize audio when visible to preload a chunk
 watch(hasloaded, (loaded) => {
-  if (loaded && !audio) {
+  if (loaded && !audio && !isVideo.value) {
     audio = new Audio(props.review.songUrl || songUrl)
     audio.preload = 'auto' // Preload a chunk
-    // Use type assertion for mp4 check since we know it's a string from computed property
-    if (isMp4.value && (props.review.mediaUrl as string).toLowerCase().includes('.mp4')) {
-      // Force a little load? usually preload='auto' is enough
-    }
   }
 })
 
@@ -69,8 +63,8 @@ const togglePlay = () => {
   if (isPlaying.value) {
     activeReviewId.value = null
   } else {
-    // Lazy init audio
-    if (!audio) {
+    // Lazy init audio only if not video
+    if (!audio && !isVideo.value) {
       audio = new Audio(props.review.songUrl || songUrl)
       audio.preload = 'auto'
     }
@@ -78,26 +72,32 @@ const togglePlay = () => {
   }
 }
 
+const isBuffering = ref(false)
+
+const onWaiting = () => {
+  if (isPlaying.value) isBuffering.value = true
+}
+
+const onPlaying = () => {
+  isBuffering.value = false
+}
+
 const onVideoEnded = () => {
   activeReviewId.value = null
+  isBuffering.value = false
 }
 
 watch(isPlaying, (playing) => {
   if (playing) {
-    if (videoRef.value) {
+    if (isVideo.value && videoRef.value) {
       videoRef.value.play().catch(e => console.error('Video play error:', e))
+    } else if (audio) {
+      // Play audio (for images)
+      audio.currentTime = 0
+      audio.play().catch(e => console.error('Audio play error:', e))
     }
-
-    // Reset audio
-    if (audio) audio.currentTime = 0
-
-    // If it's a video review, skip to 20s
-    if (isMp4.value && audio) {
-      audio.currentTime = 15
-    }
-
-    audio?.play().catch(e => console.error('Audio play error:', e))
   } else {
+    isBuffering.value = false
     if (videoRef.value) {
       videoRef.value.pause()
     }
@@ -108,11 +108,30 @@ watch(isPlaying, (playing) => {
   }
 })
 
+onDeactivated(() => {
+  if (isPlaying.value) {
+    activeReviewId.value = null
+  }
+})
+
 onUnmounted(() => {
   if (isPlaying.value) {
     activeReviewId.value = null // Stop playback if component is removed
     audio?.pause()
   }
+})
+const stars = computed(() => {
+  const result = []
+  for (let i = 1; i <= 5; i++) {
+    if (props.review.rating >= i) {
+      result.push('full')
+    } else if (props.review.rating >= i - 0.5) {
+      result.push('half')
+    } else {
+      result.push('empty')
+    }
+  }
+  return result
 })
 </script>
 
@@ -125,11 +144,17 @@ onUnmounted(() => {
 
       <!-- Video Player -->
       <video v-if="isVideo && isMp4" ref="videoRef" :src="hasloaded ? props.review.mediaUrl : undefined"
-        class="w-full h-full object-cover scale-[1.02]" playsinline :preload="hasloaded ? 'auto' : 'none'"
-        :poster="props.review.poster" @ended="onVideoEnded"></video>
+        class="w-full h-full object-cover scale-[1.02]" playsinline :preload="hasloaded ? 'auto' : 'metadata'"
+        :poster="props.review.poster" @ended="onVideoEnded" @waiting="onWaiting" @playing="onPlaying"></video>
+
+      <!-- Video Loading Spinner -->
+      <div v-if="isVideo && isPlaying && isBuffering"
+        class="absolute inset-0 z-20 flex items-center justify-center bg-black/10 backdrop-blur-[2px] pointer-events-none">
+        <div class="w-10 h-10 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+      </div>
 
       <!-- Image/Thumbnail -->
-      <template v-else>
+      <template v-if="!isVideo">
         <img :src="props.review.mediaUrl" :alt="props.review.songTitle || 'Review media'" loading="lazy"
           class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 scale-[1.02]" />
       </template>
@@ -156,18 +181,32 @@ onUnmounted(() => {
     </div>
 
     <!-- Content Section -->
-    <div class="p-6 flex flex-col flex-1">
+    <div class="p-4 md:p-6 flex flex-col flex-1">
       <!-- Stars -->
-      <div class="flex text-[var(--color-primary)] mb-4">
-        <svg v-for="i in 5" :key="i" class="w-4 h-4"
-          :class="i <= props.review.rating ? 'fill-current' : 'text-gray-300 fill-gray-300'" viewBox="0 0 20 20">
-          <path
-            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-        </svg>
+      <div class="flex gap-0.5 text-[var(--color-primary)] mb-2 md:mb-4">
+        <div v-for="(type, i) in stars" :key="i" class="relative w-4 h-4">
+          <!-- Background (Empty Star) -->
+          <svg class="w-4 h-4 text-gray-300 fill-gray-300" viewBox="0 0 20 20">
+            <path
+              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          </svg>
+          <!-- Foreground (Full Star) -->
+          <svg v-if="type === 'full'" class="absolute inset-0 w-4 h-4 fill-current" viewBox="0 0 20 20">
+            <path
+              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          </svg>
+          <!-- Foreground (Half Star) -->
+          <div v-if="type === 'half'" class="absolute inset-0 w-2 h-4 overflow-hidden">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
+              <path
+                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+          </div>
+        </div>
       </div>
 
       <!-- Text -->
-      <p class="text-text-main text-base leading-relaxed mb-6">
+      <p class="text-text-main text-sm md:text-base leading-relaxed mb-4 md:mb-6">
         {{ props.review.text }}
       </p>
 

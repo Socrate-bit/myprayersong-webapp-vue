@@ -16,15 +16,15 @@ const toggle = (index: number) => {
 </script>
 
 <template>
-  <section class="py-16 px-4 border-t border-gray-200 bg-cream flex flex-col items-center">
-    <h2 class="font-serif text-3xl md:text-5xl font-bold mb-8 text-text-main text-center">
+  <section class="py-8 md:py-16 px-4 border-t border-gray-200 bg-cream flex flex-col items-center">
+    <h2 class="font-serif text-2xl md:text-4xl font-bold mb-6 md:mb-8 text-text-main text-center">
       {{ t('faq.title', { siteName: SITE_NAME }) }}
     </h2>
 
     <div class="max-w-3xl w-full">
       <div v-for="(_, index) in faqItems" :key="index" class="border-b border-gray-200 last:border-b-0">
         <button @click="toggle(index)"
-          class="w-full flex items-center justify-between py-6 text-left focus:outline-none group cursor-pointer">
+          class="w-full flex items-center justify-between py-4 md:py-6 text-left focus:outline-none group cursor-pointer">
           <span
             class="font-serif text-lg md:text-xl font-medium text-text-main group-hover:text-secondary transition-colors">
             {{ t(`faq.questions[${index}].q`, { siteName: SITE_NAME, siteUrl: SITE_URL, email: SUPPORT_EMAIL }) }}

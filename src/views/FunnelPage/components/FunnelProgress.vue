@@ -12,17 +12,17 @@ const progressPercentage = computed(() => {
 </script>
 
 <template>
-  <div class="w-full max-w-2xl mx-auto mb-12">
+  <div class="w-full max-w-2xl mx-auto mb-6 md:mb-12">
     <!-- Progress Bar -->
-    <div class="w-full h-2 bg-[#E5E0D6] rounded-full mb-4 overflow-hidden">
+    <div class="w-full h-1.5 md:h-2 bg-[#E5E0D6] rounded-full mb-2 md:mb-4 overflow-hidden">
       <div class="h-full bg-secondary transition-all duration-500 ease-out rounded-full"
         :style="{ width: `${progressPercentage}%` }"></div>
     </div>
 
     <!-- Step Info -->
-    <div class="flex justify-between text-sm font-medium text-text-main/60">
+    <div class="flex justify-between text-[10px] md:text-sm font-medium text-text-main/60">
       <span>{{ t('funnel.navigation.step', { current: store.currentStep, total: store.totalSteps }) }}</span>
-      <span>{{ t('funnel.navigation.complete', { percent: progressPercentage }) }}</span>
+      <span>{{ t('funnel.navigation.complete', { percent: Math.round(progressPercentage) }) }}</span>
     </div>
   </div>
 </template>

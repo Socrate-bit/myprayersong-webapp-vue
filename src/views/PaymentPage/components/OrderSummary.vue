@@ -31,15 +31,15 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="bg-white rounded-2xl border-2 border-secondary/30 p-6 shadow-sm w-full mb-6">
+  <div class="bg-white rounded-2xl border-2 border-secondary/30 p-4 md:p-6 shadow-sm w-full mb-4 md:mb-6">
     <!-- Header -->
-    <div class="flex items-center gap-3 mb-6">
+    <div class="flex items-center gap-3 mb-3 md:mb-6">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
         class="w-6 h-6 text-secondary">
         <path stroke-linecap="round" stroke-linejoin="round"
           d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 11-.99-3.467l2.31-.66a2.25 2.25 0 001.632-2.164zm0 0V2.25a2.25 2.25 0 00-2.25-2.25H13.5a2.25 2.25 0 00-2.25 2.25v10.5m0 0v6.75" />
       </svg>
-      <h3 class="font-bold text-xl text-black">{{ t('payment.summary.title') }}</h3>
+      <h3 class="font-bold text-lg md:text-xl text-black">{{ t('payment.summary.title') }}</h3>
     </div>
 
     <!-- Details -->
@@ -54,21 +54,7 @@ const emit = defineEmits<{
       </div>
     </div>
 
-    <!-- Express Delivery Option -->
-    <div class="flex items-start gap-3 mb-6 p-4 bg-gray-50 rounded-xl border border-gray-100">
-      <div class="pt-1">
-        <input type="checkbox" id="express-delivery" v-model="isExpress"
-          class="w-5 h-5 text-secondary border-gray-300 rounded focus:ring-secondary cursor-pointer accent-secondary">
-      </div>
-      <label for="express-delivery" class="cursor-pointer flex-1">
-        <div class="flex justify-between items-center">
-          <span class="font-bold text-text-main">{{ t('payment.summary.express') }}</span>
-          <span class="font-bold text-secondary">{{ t('payment.summary.expressPrice', { price: PRICE_EXPRESS_UPGRADE })
-            }}</span>
-        </div>
-        <p class="text-sm text-text-muted mt-1">{{ t('payment.summary.expressDesc') }}</p>
-      </label>
-    </div>
+
 
     <!-- Pricing -->
     <h4 class="font-bold text-lg mb-2">{{ t('payment.summary.customSong') }}</h4>
@@ -82,13 +68,29 @@ const emit = defineEmits<{
           price:
             PRICE_ORIGINAL
         }) }}</span>
-        <span class="text-secondary font-bold text-2xl">{{ displayedPrice }}</span>
+        <span class="text-secondary font-bold text-xl md:text-2xl">{{ displayedPrice }}</span>
       </div>
+    </div>
+
+    <!-- Express Delivery Option -->
+    <div class="flex items-start gap-3 mb-4 md:mb-6 p-3 md:p-4 bg-gray-50 rounded-xl border border-gray-100">
+      <div class="pt-1">
+        <input type="checkbox" id="express-delivery" v-model="isExpress"
+          class="w-5 h-5 text-secondary border-gray-300 rounded focus:ring-secondary cursor-pointer accent-secondary">
+      </div>
+      <label for="express-delivery" class="cursor-pointer flex-1">
+        <div class="flex justify-between items-center">
+          <span class="font-bold text-text-main">{{ t('payment.summary.express') }}</span>
+          <span class="font-bold text-secondary">{{ t('payment.summary.expressPrice', { price: PRICE_EXPRESS_UPGRADE })
+          }}</span>
+        </div>
+        <p class="text-sm text-text-muted mt-1">{{ t('payment.summary.expressDesc') }}</p>
+      </label>
     </div>
 
     <!-- Edit Button -->
     <button @click="emit('open-edit')"
-      class="w-full bg-secondary/10 hover:bg-secondary/20 border border-secondary/30 text-secondary font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer">
+      class="w-full bg-secondary/10 hover:bg-secondary/20 border border-secondary/30 text-secondary font-bold py-2.5 md:py-3 rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
         class="w-4 h-4">
         <path stroke-linecap="round" stroke-linejoin="round"

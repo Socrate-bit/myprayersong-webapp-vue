@@ -11,8 +11,15 @@ export const useAudioStore = defineStore('audio', {
     actions: {
         init(url: string) {
             if (this.audio) {
-                // If the URL is different, we might need to change source, but here it's strictly the same song "Exemple1.mp3".
-                // However, to ensure "come back from start" when switching, we might want to reset.
+                if (this.audio.src.includes(url)) {
+                    return
+                }
+                // URL changed, pause and reset
+                this.audio.pause()
+                this.audio.src = url
+                this.audio.load()
+                this.currentTime = 0
+                this.duration = 0
                 return
             }
 

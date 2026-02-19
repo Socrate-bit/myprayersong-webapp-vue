@@ -2,10 +2,9 @@
 import { useI18n } from 'vue-i18n'
 import { useAudioStore } from '@/stores/audio'
 import { computed, ref, onMounted } from 'vue'
-import { getStorageUrl } from '@/services/firebase'
 import { SITE_NAME } from '@/constants'
 
-const songUrl = getStorageUrl('songs', 'Exemple1.mp3')
+const songUrl = '/songs/larrissa_man.mp3'
 
 const { t } = useI18n()
 const audioStore = useAudioStore()
@@ -79,23 +78,23 @@ const skip = (seconds: number) => {
 </script>
 
 <template>
-  <section class="py-16 px-4 bg-creap flex flex-col items-center">
+  <section class="py-6 md:py-16 px-4 bg-creap flex flex-col items-center">
     <!-- Header -->
-    <div class="text-center max-w-2xl mb-16">
-      <h2 class="font-serif text-3xl md:text-5xl font-bold mb-6 text-text-main">
+    <div class="text-center max-w-2xl mb-6 md:mb-16">
+      <h2 class="font-serif text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-text-main">
         {{ t('whatYouGet.title') }}
       </h2>
-      <p class="text-text-main/80 text-lg leading-relaxed">
+      <p class="text-text-main/80 text-base md:text-lg leading-relaxed">
         {{ t('whatYouGet.subtitle') }}
       </p>
     </div>
 
     <!-- Music Player Card -->
-    <div class="bg-white rounded-3xl p-8 shadow-xl w-full max-w-md border border-gray-100 relative">
+    <div class="bg-white rounded-3xl p-6 md:p-8 shadow-xl w-full max-w-md border border-gray-100 relative">
       <div class="flex flex-col items-center">
         <!-- Vinyl Record Graphic -->
         <div
-          class="w-64 h-64 rounded-full bg-gray-900 relative shadow-2xl mb-10 flex items-center justify-center transition-transform duration-[10000ms]"
+          class="w-48 h-48 md:w-64 md:h-64 rounded-full bg-gray-900 relative shadow-2xl mb-6 md:mb-10 flex items-center justify-center transition-transform duration-[10000ms]"
           :class="{ 'animate-[spin_4s_linear_infinite]': isCurrentPlayer && audioStore.isPlaying }">
           <!-- Inner Grooves (Visual only) -->
           <div class="absolute inset-4 rounded-full border border-gray-800 opacity-50"></div>
@@ -104,7 +103,7 @@ const skip = (seconds: number) => {
 
           <!-- Label -->
           <div class="w-24 h-24 bg-cream rounded-full flex items-center justify-center shadow-inner relative z-10">
-            <span class="font-serif font-bold italic text-sm">{{ SITE_NAME }}</span>
+            <span class="font-serif font-bold italic text-[10px] uppercase tracking-tighter">{{ SITE_NAME }}</span>
           </div>
         </div>
 

@@ -7,8 +7,8 @@ import FunnelStep4 from './components/FunnelStep4.vue'
 import FunnelStep5 from './components/FunnelStep5.vue'
 import { useFunnelStore } from '../../stores/funnel'
 import { useI18n } from 'vue-i18n'
-import { SITE_NAME } from '@/constants'
-const logo = '/En-tête.png'
+import { SITE_NAME, LOGO_URL } from '@/constants'
+const logo = LOGO_URL
 
 const store = useFunnelStore()
 const { t } = useI18n()
@@ -17,12 +17,12 @@ const { t } = useI18n()
 <template>
   <div class="min-h-screen bg-cream flex flex-col">
     <!-- Simple Header -->
-    <header class="py-6 flex justify-center border-b border-[#E5E0D6]/50 bg-secondary">
-      <img :src="logo" :alt="t('title', { siteName: SITE_NAME })" class="h-12 w-auto object-contain" />
+    <header class="py-4 md:py-4 flex justify-center border-b border-[#E5E0D6]/50 bg-secondary">
+      <img :src="logo" :alt="t('title', { siteName: SITE_NAME })" class="h-10 md:h-12 w-auto object-contain" />
     </header>
 
     <!-- Main Content -->
-    <main class="flex-1 w-full max-w-4xl mx-auto px-4 py-8 md:py-12">
+    <main class="flex-1 w-full max-w-4xl mx-auto px-4 py-4 md:py-12">
       <FunnelProgress />
 
       <!-- Dynamic Step Rendering -->

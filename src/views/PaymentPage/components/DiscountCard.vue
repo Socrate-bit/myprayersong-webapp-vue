@@ -6,11 +6,12 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <div class="bg-primary/5 rounded-2xl border-2 border-primary/30 p-6 shadow-sm w-full mb-6">
-    <div class="flex items-start gap-4 mb-4">
-      <div class="text-4xl">🎁</div>
+  <div
+    class="bg-[var(--color-primary)]/10 rounded-2xl border-2 border-[var(--color-primary)]/30 p-4 md:p-6 shadow-sm w-full mb-4 md:mb-6">
+    <div class="flex items-start gap-3 md:gap-4 mb-3 md:mb-4">
+      <div class="text-3xl md:text-4xl">🎁</div>
       <div>
-        <h3 class="font-bold text-xl text-secondary mb-4">
+        <h3 class="font-bold text-lg md:text-xl text-black mb-1 md:mb-2">
           {{ t('payment.discountCard.title') }}
         </h3>
         <p class="text-text-main mb-4 leading-relaxed">

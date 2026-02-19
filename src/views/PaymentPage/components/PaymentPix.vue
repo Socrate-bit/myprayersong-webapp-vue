@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import pixLogo from '@/assets/pix-seeklogo.png'
+const pixLogo = '/pix-seeklogo.png'
 
 const { t } = useI18n()
 </script>

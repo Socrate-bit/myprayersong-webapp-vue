@@ -72,19 +72,19 @@ const closePopup = () => {
 </script>
 
 <template>
-  <div class="w-full max-w-3xl mx-auto bg-white rounded-2xl shadow-xl shadow-black/5 p-8 md:p-10 mt-8 relative">
+  <div class="w-full max-w-3xl mx-auto bg-white rounded-2xl shadow-xl shadow-black/5 p-5 md:p-10 mt-6 md:mt-8 relative">
     <div class="flex flex-col gap-4">
       <input type="email" v-model="email" @keyup.enter="checkOrderStatus"
         :placeholder="t('trackOrder.form.placeholder')"
         :class="{ '!border-red-500 !ring-red-200 focus:!border-red-500 focus:!ring-red-200': error }"
-        class="w-full px-6 py-4 rounded-xl border border-gray-200 text-lg placeholder:text-gray-400 focus:outline-none focus:border-[color:var(--color-secondary)] focus:ring-1 focus:ring-[color:var(--color-secondary)] bg-gray-50 transition-all" />
+        class="w-full px-4 py-3 md:px-6 md:py-4 rounded-xl border border-gray-200 text-base md:text-lg placeholder:text-gray-400 focus:outline-none focus:border-[color:var(--color-secondary)] focus:ring-1 focus:ring-[color:var(--color-secondary)] bg-gray-50 transition-all" />
 
       <p v-if="error" class="text-red-500 text-sm ml-2 -mt-2">
         {{ t('trackOrder.form.notFound') }}
       </p>
 
       <button @click="checkOrderStatus" :disabled="isLoading"
-        class="w-full bg-secondary hover:bg-secondary-hover text-white font-bold py-4 px-6 rounded-xl text-lg flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:shadow-md duration-200 disabled:opacity-70 disabled:cursor-not-allowed">
+        class="w-full bg-secondary hover:bg-secondary-hover text-white font-bold py-3 px-6 md:py-4 rounded-xl text-base md:text-lg flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:shadow-md duration-200 disabled:opacity-70 disabled:cursor-not-allowed">
         <svg v-if="!isLoading" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>

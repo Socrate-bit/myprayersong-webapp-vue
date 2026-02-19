@@ -1,40 +1,30 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import img1 from '@/assets/Options/6.jpg'
-import img2 from '@/assets/Options/10.jpg'
-import img3 from '@/assets/Options/11.jpg'
-import img4 from '@/assets/Options/2.jpg'
-import img5 from '@/assets/Options/9.jpg'
-import img6 from '@/assets/Options/1.jpg'
-import img7 from '@/assets/Options/5.jpg'
-import img8 from '@/assets/Options/8.jpg'
-import img9 from '@/assets/Options/4.jpg'
 import GiftButton from '@/components/GiftButton.vue'
-
 const { t } = useI18n()
 
 const categories = [
-  { id: 'partner', img: img1 },
-  { id: 'children', img: img2 },
-  { id: 'loss', img: img3 },
-  { id: 'parents', img: img4 },
-  { id: 'yourself', img: img5 },
-  { id: 'strength', img: img6 },
-  { id: 'healing', img: img7 },
-  { id: 'prayers', img: img8 },
-  { id: 'breakthroughs', img: img9 }
+  { id: 'partner', img: '/Options/6.jpg' },
+  { id: 'children', img: '/Options/10.jpg' },
+  { id: 'loss', img: '/Options/11.jpg' },
+  { id: 'parents', img: '/Options/2.jpg' },
+  { id: 'yourself', img: '/Options/9.jpg' },
+  { id: 'strength', img: '/Options/1.jpg' },
+  { id: 'healing', img: '/Options/5.jpg' },
+  { id: 'prayers', img: '/Options/8.jpg' },
+  { id: 'breakthroughs', img: '/Options/4.jpg' }
 ]
 </script>
 
 <template>
-  <section class="bg-secondary py-16 px-4 text-center">
+  <section class="bg-secondary py-8 md:py-16 px-4 text-center">
     <!-- Title -->
-    <h2 class="text-white font-serif text-3xl md:text-4xl font-bold mb-16">
+    <h2 class="text-white font-serif text-2xl md:text-4xl font-bold mb-6 md:mb-16">
       {{ t('giftGrid.title') }}
     </h2>
 
     <!-- Grid -->
-    <div class="max-w-6xl mx-auto grid grid-cols-3 gap-3 md:gap-6 mb-16">
+    <div class="max-w-3xl mx-auto grid grid-cols-3 gap-2 md:gap-6 mb-8 md:mb-16">
       <div v-for="cat in categories" :key="cat.id"
         class="relative group cursor-pointer overflow-hidden rounded-xl md:rounded-2xl aspect-square bg-gray-800">
         <!-- Image -->

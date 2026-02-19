@@ -1,29 +1,29 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import GiftButton from '@/components/GiftButton.vue'
-import avatar1 from '@/assets/avatar/1.jpg'
-import avatar2 from '@/assets/avatar/2.jpg'
-import avatar3 from '@/assets/avatar/3.jpg'
-import avatar4 from '@/assets/avatar/4.jpg'
-
 const { t } = useI18n()
-const avatars = [avatar1, avatar2, avatar3, avatar4]
+const avatars = [
+  '/avatar/1.jpg',
+  '/avatar/2.jpg',
+  '/avatar/3.jpg',
+  '/avatar/4.jpg'
+]
 </script>
 
 <template>
-  <section class="flex flex-col items-center py-16 px-4 text-center max-w-4xl mx-auto">
+  <section class="flex flex-col items-center pb-4 md:pb-8 px-4 text-center max-w-4xl mx-auto">
     <!-- Top Badge -->
-    <div class="tracking-widest text-xs font-bold text-text-main/70 uppercase mb-6">
+    <div class="tracking-widest text-xs font-bold text-text-main/70 uppercase mb-2 md:mb-6">
       {{ t('valueProp.badge') }}
     </div>
 
     <!-- Headline -->
-    <h1 class="font-serif text-5xl md:text-6xl font-bold text-text-main mb-6 leading-tight">
+    <h1 class="font-serif text-3xl md:text-6xl font-bold text-text-main mb-2 md:mb-6 leading-tight">
       {{ t('valueProp.headline') }}
     </h1>
 
     <!-- Subheadline -->
-    <p class="font-sans text-lg md:text-xl text-text-main/80 mb-10 max-w-2xl">
+    <p class="font-sans text-md  md:text-xl text-text-main/80 mb-4 md:mb-10 max-w-2xl">
       {{ t('valueProp.subheadline') }}
     </p>
 
@@ -32,7 +32,7 @@ const avatars = [avatar1, avatar2, avatar3, avatar4]
     <GiftButton :text="t('valueProp.cta')" />
 
     <!-- Delivery Text -->
-    <p class="font-serif italic text-text-main/70 mb-10 text-sm">
+    <p class="font-serif italic text-text-main/70 mb-8 md:mb-10 text-sm">
       {{ t('valueProp.delivery') }}
     </p>
 
@@ -57,7 +57,7 @@ const avatars = [avatar1, avatar2, avatar3, avatar4]
           </div>
           <div
             class="w-10 h-10 rounded-full border-2 border-cream bg-secondary flex items-center justify-center text-xs font-bold text-white z-10">
-            +1318
+            +4318
           </div>
         </div>
       </div>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { SITE_NAME } from '@/constants'
-const logo = '/En-tête.png'
+import { SITE_NAME, LOGO_URL } from '@/constants'
+const logo = LOGO_URL
 
 const { t } = useI18n()
 const isMenuOpen = ref(false)
@@ -14,9 +14,9 @@ const toggleMenu = () => {
 
 <template>
   <header class="bg-secondary sticky top-0 z-50 shadow-md">
-    <div class="flex items-center justify-between px-4 py-5 max-w-[1400px] mx-auto w-full">
+    <div class="flex items-center justify-between px-4 py-3 md:py-4 max-w-[1400px] mx-auto w-full">
       <RouterLink to="/">
-        <img :src="logo" :alt="SITE_NAME" class="cursor-pointer h-12 w-auto object-contain" />
+        <img :src="logo" :alt="SITE_NAME" class="cursor-pointer h-8 md:h-12 w-auto object-contain" />
       </RouterLink>
 
       <!-- Desktop Navigation -->

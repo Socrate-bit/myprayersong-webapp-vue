@@ -6,54 +6,58 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <footer class="bg-secondary-dark text-white pt-16 pb-8 px-4">
+  <footer class="bg-secondary text-white pt-10 pb-6 px-4 md:pt-16 md:pb-8">
     <div class="max-w-4xl mx-auto flex flex-col items-center text-center">
       <!-- Logo -->
-      <div class="text-3xl font-serif italic font-bold tracking-tight mb-8">
+      <div class="text-2xl md:text-3xl font-serif italic font-bold tracking-tight mb-4 md:mb-8">
         {{ SITE_NAME }}
       </div>
 
       <!-- Tagline -->
-      <p class="text-text-secondary max-w-xl mb-16 leading-relaxed">
+      <p class="text-text-secondary max-w-xl mb-8 md:mb-16 leading-relaxed text-sm md:text-base">
         {{ t('footer.tagline', { siteName: SITE_NAME }) }}
       </p>
 
       <!-- Grid Links -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-12 w-full max-w-3xl mb-16">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 w-full max-w-3xl mb-8 md:mb-16">
         <!-- Contact -->
-        <div class="flex flex-col gap-4">
-          <h4 class="font-bold text-lg">{{ t('footer.contact.title') }}</h4>
+        <div class="flex flex-col gap-2 md:gap-4">
+          <h4 class="font-bold text-base md:text-lg">{{ t('footer.contact.title') }}</h4>
           <a :href="`mailto:${SUPPORT_EMAIL}`"
-            class="text-text-secondary hover:text-white transition-colors underline decoration-text-secondary hover:decoration-white">
+            class="text-text-secondary hover:text-white transition-colors underline decoration-text-secondary hover:decoration-white text-sm md:text-base">
             {{ t('footer.contact.email', { email: SUPPORT_EMAIL }) }}
           </a>
         </div>
 
         <!-- Track Order -->
-        <div class="flex flex-col gap-4">
-          <h4 class="font-bold text-lg">{{ t('footer.trackOrder.title') }}</h4>
-          <router-link to="/track-order" class="text-text-secondary hover:text-white transition-colors">
+        <div class="flex flex-col gap-2 md:gap-4">
+          <h4 class="font-bold text-base md:text-lg">{{ t('footer.trackOrder.title') }}</h4>
+          <router-link to="/track-order"
+            class="text-text-secondary hover:text-white transition-colors text-sm md:text-base">
             {{ t('footer.trackOrder.link') }}
           </router-link>
         </div>
 
         <!-- Links -->
-        <div class="flex flex-col gap-4">
-          <h4 class="font-bold text-lg">{{ t('footer.links.title') }}</h4>
+        <div class="flex flex-col gap-2 md:gap-4">
+          <h4 class="font-bold text-base md:text-lg">{{ t('footer.links.title') }}</h4>
           <div class="flex flex-col gap-2">
-            <router-link to="/reviews" class="text-text-secondary hover:text-white transition-colors">{{
-              t('footer.links.reviews') }}</router-link>
-            <router-link to="/terms" class="text-text-secondary hover:text-white transition-colors">{{
-              t('footer.links.terms')
-            }}</router-link>
-            <router-link to="/privacy" class="text-text-secondary hover:text-white transition-colors">{{
-              t('footer.links.privacy') }}</router-link>
+            <router-link to="/reviews"
+              class="text-text-secondary hover:text-white transition-colors text-sm md:text-base">{{
+                t('footer.links.reviews') }}</router-link>
+            <router-link to="/terms"
+              class="text-text-secondary hover:text-white transition-colors text-sm md:text-base">{{
+                t('footer.links.terms')
+              }}</router-link>
+            <router-link to="/privacy"
+              class="text-text-secondary hover:text-white transition-colors text-sm md:text-base">{{
+                t('footer.links.privacy') }}</router-link>
           </div>
         </div>
       </div>
 
       <!-- Social Icons -->
-      <div class="flex items-center gap-6 mb-12 text-text-secondary">
+      <div class="flex items-center gap-6 mb-8 md:mb-12 text-text-secondary">
         <div class="hover:text-white transition-colors">
           <svg fill="currentColor" viewBox="0 0 24 24" class="w-6 h-6">
             <path
@@ -81,7 +85,7 @@ const { t } = useI18n()
       </div>
 
       <!-- Copyright -->
-      <div class="border-t border-text-secondary w-full pt-8 text-sm text-text-secondary">
+      <div class="border-t border-text-secondary w-full pt-6 md:pt-8 text-xs md:text-sm text-text-secondary">
         {{ t('footer.copyright', { siteName: SITE_NAME }) }}
       </div>
     </div>

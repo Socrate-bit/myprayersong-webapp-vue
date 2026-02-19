@@ -1,29 +1,27 @@
-import img1 from '@/assets/Comments/1.jpg'
-import img2 from '@/assets/Comments/2.jpg'
-import img3 from '@/assets/Comments/3.jpg'
-import img7 from '@/assets/Comments/7.jpg'
+const img1 = '/Comments/1.jpg'
+const img2 = '/Comments/2.jpg'
+const img3 = '/Comments/3.jpg'
+const img7 = '/Comments/7.jpg'
 
-import exemplePoster from '@/assets/posters/Exemple1_poster.jpg'
-import deadPoster from '@/assets/posters/dead_poster.jpg'
-import love1Poster from '@/assets/posters/love_1_poster.jpg'
-import love2Poster from '@/assets/posters/love_2_poster.jpg'
-import motherPoster from '@/assets/posters/mother_poster.jpg'
-
-import { getStorageUrl } from '@/services/firebase'
+const exemplePoster = '/posters/Exemple1_poster.jpg'
+const deadPoster = '/posters/dead_poster.jpg'
+const love1Poster = '/posters/love_1_poster.jpg'
+const love2Poster = '/posters/love_2_poster.jpg'
+const motherPoster = '/posters/mother_poster.jpg'
 
 // Import videos from assets
-const exempleVideo = getStorageUrl('videos', 'Exemple1.mp4')
-const deadVideo = getStorageUrl('videos', 'dead.mp4')
-const love1Video = getStorageUrl('videos', 'love_1.mp4')
-const love2Video = getStorageUrl('videos', 'love_2.mp4')
-const motherVideo = getStorageUrl('videos', 'mother.mp4')
+const exempleVideo = '/testimonies/testimony_exemple1.mp4'
+const deadVideo = '/testimonies/testimony_dead.mp4'
+const love1Video = '/testimonies/testimony_love1.mp4'
+const love2Video = '/testimonies/testimony_love2.mp4'
+const motherVideo = '/testimonies/testimony_mother.mp4'
 
 // Import songs from assets
-const exempleSong = getStorageUrl('songs', 'Exemple1.mp3')
-const deadSong = getStorageUrl('songs', 'dead.mp3')
-const love1Song = getStorageUrl('songs', 'love_1.mp3')
-const love2Song = getStorageUrl('songs', 'love_2.mp3')
-const motherSong = getStorageUrl('songs', 'mother.mp3')
+const exempleSong = '/songs/Exemple1.mp3'
+const deadSong = '/songs/dead.mp3'
+const love1Song = '/songs/love_1.mp3'
+const love2Song = '/songs/love_2.mp3'
+const motherSong = '/songs/mother.mp3'
 
 export interface Review {
   id: number
@@ -46,7 +44,7 @@ export const reviews: Review[] = [
     author: 'Luciana M.',
     verified: true,
     rating: 5,
-    text: "Gente, eu tô um lixo kkkkk sério, as lágrimas não param de cair. 😭 Não sei como vcs pegaram minhas anotações bagunçadas e transformaram em algo tão profissional e pessoal. Parece que vcs conhecem a nossa vida! Essa melodia é um verdadeiro presente de Deus.",
+    text: "Gente, eu me emocionei demais kkkkk sério, as lágrimas não param de cair. 😭 Não sei como vcs transformaram nossa história em algo tão profissional e pessoal. Parece que vcs conhecem a nossa vida! Essa melodia é um verdadeiro presente de Deus.",
     type: 'text',
     date: '12/01/2026'
   },
@@ -56,7 +54,7 @@ export const reviews: Review[] = [
     author: 'Sandra G.',
     verified: true,
     rating: 5,
-    text: "Todo dia eu tento manter viva a memória da minha sobrinha, e encontrar vcs no Face foi uma benção. Chorei na primeira estrofe. Obrigada por me ajudarem a honrar o espírito dela de um jeito tão doce — vcs estão trazendo alegria e cura para muitas vidas com esse dom.",
+    text: "Todo dia eu tento manter viva a memória da minha sobrinha, e encontrar vcs no Face foi uma benção. Chorei na primeira estrofe. Obrigada por me ajudarem a honrar o espírito dela de um jeito tão doce, vcs estão trazendo alegria e cura para muitas vidas com esse dom.",
     type: 'text',
     date: '18/01/2026'
   },
@@ -77,8 +75,8 @@ export const reviews: Review[] = [
     showLanding: true,
     author: 'Tatiana K.',
     verified: true,
-    rating: 5,
-    text: "Esse foi o MELHOR presente, o mais carinhoso que já recebi na vida. Tô chorando horrores aqui só de imaginar a reação dele hoje à noite. Vcs tocaram minha alma com essa letra... mal posso esperar para mostrar e mandar o vídeo da reação pra vcs!",
+    rating: 4.5,
+    text: "Esse foi o MELHOR presente, o mais carinhoso que já recebi na vida. Fiquei sem palavras e com o coração batendo forte só de imaginar a reação dele hoje à noite. Vcs tocaram minha alma com essa letra... mal posso esperar!",
     type: 'text',
     date: '25/01/2026'
   },
@@ -120,7 +118,7 @@ export const reviews: Review[] = [
     author: 'Jéssica Santos',
     verified: true,
     rating: 5,
-    text: "Que surpresa inacreditável. Vcs capturaram os 50 anos dos meus pais com perfeição — parece música de rádio, mas é sobre a MINHA família. Obrigada por nos ajudarem a celebrar eles de um jeito tão profundo.",
+    text: "Que surpresa inacreditável. Vcs capturaram os 50 anos dos meus pais com perfeição, parece música de rádio, mas é sobre a MINHA família. Obrigada por nos ajudarem a celebrar eles de um jeito tão profundo.",
     type: 'image',
     showLanding: true,
     mediaUrl: img2,
@@ -129,48 +127,6 @@ export const reviews: Review[] = [
   },
   {
     id: 10,
-    author: 'Diego M.',
-    verified: true,
-    rating: 5,
-    text: "Ela começou a chorar em segundos. Dei pra minha esposa no nosso aniversário e ela ficou estática... teve até que sentar. Foi o melhor presente que já dei em todo o nosso casamento.",
-    type: 'video',
-    showLanding: true,
-    mediaUrl: love1Video,
-    poster: love1Poster,
-    songTitle: 'Minha Linda Esposa',
-    songUrl: love1Song,
-    date: '28/01/2026'
-  },
-  {
-    id: 11,
-    author: 'Amanda Souza',
-    verified: true,
-    rating: 5,
-    text: "Tocando isso pra ele uma última vez hoje. 🕊️ Capturou perfeitamente o amor que construímos com a graça de Deus. É um conforto ter essa memória preciosa. Sei que ele está ouvindo lá de cima e sorrindo.",
-    type: 'video',
-    showLanding: true,
-    mediaUrl: deadVideo,
-    poster: deadPoster,
-    songTitle: 'Até nos Encontrarmos de Novo',
-    songUrl: deadSong,
-    date: '15/01/2026'
-  },
-  {
-    id: 12,
-    author: 'Dani Silva',
-    verified: true,
-    rating: 5,
-    text: "Minha mãe não para de falar desse presente! Ela disse que é a coisa mais especial que ela já teve na vida. Ficou tão doce e sincero, uma verdadeira 'oração' em forma de música que nossa família vai guardar pra sempre.",
-    type: 'video',
-    showLanding: true,
-    mediaUrl: motherVideo,
-    poster: motherPoster,
-    songTitle: 'Obrigado Mãe',
-    songUrl: motherSong,
-    date: '22/01/2026'
-  },
-  {
-    id: 13,
     author: 'Marcelo D.',
     verified: true,
     rating: 5,
@@ -184,10 +140,10 @@ export const reviews: Review[] = [
     date: '08/01/2026'
   },
   {
-    id: 14,
+    id: 11,
     author: 'Bruno Teixeira',
     verified: true,
-    rating: 4,
+    rating: 5,
     text: "Ela caiu no choro ao ouvir a música. Ver a reação dela não tem preço. Eu estava apreensivo com os detalhes, mas vocês foram extremamente atenciosos e captaram nossa história perfeitamente.",
     type: 'video',
     showLanding: true,
@@ -198,12 +154,55 @@ export const reviews: Review[] = [
     date: '10/01/2026'
   },
   {
+    id: 12,
+    author: 'Diego M.',
+    verified: true,
+    rating: 4.5,
+    text: "Ela começou a chorar em segundos. Dei pra minha esposa no nosso aniversário e ela ficou em total estado de graça... foi uma emoção indescritível. Foi o melhor presente que já dei em todo o nosso casamento.",
+    type: 'video',
+    showLanding: true,
+    mediaUrl: love1Video,
+    poster: love1Poster,
+    songTitle: 'Minha Linda Esposa',
+    songUrl: love1Song,
+    date: '28/01/2026'
+  },
+  {
+    id: 13,
+    author: 'Amanda Souza',
+    verified: true,
+    rating: 5,
+    text: "Tocando isso pra ele uma última vez hoje. 🕊️ Capturou perfeitamente o amor que construímos com a graça de Deus. É um conforto ter essa memória preciosa. Sei que ele está ouvindo lá de cima e sorrindo.",
+    type: 'video',
+    showLanding: true,
+    mediaUrl: deadVideo,
+    poster: deadPoster,
+    songTitle: 'Até nos Encontrarmos de Novo',
+    songUrl: deadSong,
+    date: '15/01/2026'
+  },
+  {
+    id: 14,
+    author: 'Dani Silva',
+    verified: true,
+    rating: 5,
+    text: "Minha mãe não para de falar desse presente! Ela disse que é a coisa mais especial que ela já teve na vida. Ficou tão doce e sincero, uma verdadeira 'oração' em forma de música que nossa família vai guardar pra sempre.",
+    type: 'video',
+    showLanding: true,
+    mediaUrl: motherVideo,
+    poster: motherPoster,
+    songTitle: 'Obrigado Mãe',
+    songUrl: motherSong,
+    date: '22/01/2026'
+  },
+
+  {
     id: 21,
     showLanding: true,
     author: 'Nathália S.',
     verified: true,
     rating: 5,
-    text: "gente to um lixo kkkk serio dei o presente pra ele agora e o homem nao parava de chorar. falou q foi o melhor presente da vida dele. Deus é mt bom obrigada por isso msm",
+    text: "gente, não segurei a emoção kkkk serio dei o presente pra ele agora e o homem nao parava de chorar. falou q foi o melhor presente da vida dele. Deus é mt bom obrigada por isso msm",
     type: 'text',
     date: '03/02/2026'
   },
@@ -212,13 +211,13 @@ export const reviews: Review[] = [
     author: 'Camila Lima',
     verified: true,
     rating: 5,
-    text: "nossa eu esqueci total de falar dos meus filhos na hora de pedir mas mandei email e deixaram eu refazer!! tava morrendo de medo de ficar errado mas corrigiram super rapido. ficou perfeito",
+    text: "Serviço de alta qualidade e entrega pontual. A composição musical reflete profissionalismo e o atendimento é bastante prestativo durante todo o processo.",
     type: 'text',
     date: '11/01/2026'
   },
   {
     id: 23,
-    author: 'Luciana M.',
+    author: 'Lúcia G',
     verified: true,
     rating: 5,
     text: "5 estrelas!!! meu marido ficou tao feliz q quase chorou e ele NUNCA chora kkkk. mostrou real nosso amor e a benção de Deus na nossa vida. vlw msm",
@@ -227,10 +226,10 @@ export const reviews: Review[] = [
   },
   {
     id: 24,
-    author: 'Ricardo Oliveira',
+    author: 'Renato V',
     verified: true,
     rating: 5,
-    text: "deixaram eu mudar uma parte q eu nao curti mt no começo. ainda bem pq agora ficou 100% perfeito. atendimento nota 10 e a musica é a coisa mais linda…",
+    text: "Excelente padrão de produção e musicalidade. O resultado final está em total conformidade com o que foi solicitado, atendendo muito bem às expectativas.",
     type: 'text',
     date: '16/01/2026'
   },
@@ -245,7 +244,7 @@ export const reviews: Review[] = [
   },
   {
     id: 26,
-    author: 'Beatriz F.',
+    author: 'Bernadete F.',
     verified: true,
     rating: 5,
     text: "eu errei as infos q mandei mas eles deixaram eu ajustar tudo. to mto feliz q escolhi a CançãoOração. nao pensem duas vezes gente vale cada centavo",
@@ -281,16 +280,16 @@ export const reviews: Review[] = [
   },
   {
     id: 30,
-    author: 'Jéssica Santos',
+    author: 'Joyce S.',
     verified: true,
     rating: 5,
-    text: "tô chorando horrores aqui… meu marido ficou em choque nao sabia nem o que falar. melhor presente q ja dei. obrigada por essa benção! 🙏",
+    text: "fiquei com os olhos cheios de d'água… meu marido ficou em choque nao sabia nem o que falar. melhor presente q ja dei. obrigada por essa benção! 🙏",
     type: 'text',
     date: '13/01/2026'
   },
   {
     id: 31,
-    author: 'Tatiana K.',
+    author: 'Talita K.',
     verified: true,
     rating: 5,
     text: "esqueci de colocar a data do nosso casamento mas deixaram eu refazer e incluir. ainda bem pq ficou perfeito. Deus abençoe vcs!!",
@@ -298,17 +297,8 @@ export const reviews: Review[] = [
     date: '07/01/2026'
   },
   {
-    id: 32,
-    author: 'Marcelo D.',
-    verified: true,
-    rating: 5,
-    text: "achei q ia ser tipo aquelas vozes de robo mas a qualidade é surreal de boa. minha esposa amou dms. 5 estrelas com certeza",
-    type: 'text',
-    date: '04/02/2026'
-  },
-  {
     id: 33,
-    author: 'Amanda Souza',
+    author: 'Alice S.',
     verified: true,
     rating: 5,
     text: "presente de milhões!!! ele nao para de ouvir kkkk. mostra real o amor que a gente tem um pelo outro e por Deus.",
@@ -319,7 +309,7 @@ export const reviews: Review[] = [
     id: 34,
     author: 'Bruna Lopes',
     verified: true,
-    rating: 4,
+    rating: 4.5,
     text: "Eles sao mt pacientes! Nao gostei de uma frase e mudaram pra mim sem problema nenhum. raro ver gente que se importa de vdd se a gente gostou ou nao. coisa linda",
     type: 'text',
     date: '30/01/2026'
@@ -335,7 +325,7 @@ export const reviews: Review[] = [
   },
   {
     id: 36,
-    author: 'Sandra G.',
+    author: 'Silvia G.',
     verified: true,
     rating: 5,
     text: "meu esposo quase caiu pra tras quando ouviu o nome dele. falou que foi a coisa mais linda que ja fizeram por ele. trabalho top",
@@ -344,10 +334,10 @@ export const reviews: Review[] = [
   },
   {
     id: 37,
-    author: 'Diego M.',
+    author: 'Douglas M.',
     verified: true,
     rating: 5,
-    text: "vi q esqueci uma parte super importante da nossa historia depois q pedi. mandei email e arrumaram na hora. ficou do jeitinho q eu queria. Deus é fiel!!",
+    text: "Trabalho musical de primeira linha e pontualidade na entrega. A comunicação foi clara e os elementos da história foram bem integrados à melodia.",
     type: 'text',
     date: '09/01/2026'
   },
@@ -374,16 +364,16 @@ export const reviews: Review[] = [
     author: 'Simone R. Alves',
     verified: true,
     rating: 5,
-    text: "Ainda estou tremendo. Dei pro meu marido no nosso aniversário e ele ficou estático… teve até que sentar. Me disse que foi o melhor presente que já ganhou na vida! Capturou perfeitamente o amor que construímos com a graça de Deus. Ver ele feliz assim valeu cada centavo.",
+    text: "Ainda estou tremendo. Dei pro meu marido no nosso aniversário e ele ficou sem fôlego de tanta surpresa. Me disse que foi o melhor presente que já ganhou na vida! Capturou perfeitamente o amor que construímos com a graça de Deus. Ver ele feliz assim valeu cada centavo.",
     type: 'text',
     date: '03/01/2026'
   },
   {
     id: 41,
-    author: 'Juliana Melo',
+    author: 'Júlia M.',
     verified: true,
     rating: 5,
-    text: "Acabei de ouvir e sério, tô acabada… mas do melhor jeito possível. 😭 Não sei como vcs pegaram minhas anotações bagunçadas e transformaram em algo tão profissional e pessoal ao mesmo tempo. Parece que vcs conhecem a nossa vida. Obrigada, obrigada!",
+    text: "Acabei de ouvir e sério, fiquei com um nó na garganta… mas do melhor jeito possível. 😭 Não sei como vcs transformaram nossa história em algo tão profissional e pessoal ao mesmo tempo. Parece que vcs conhecem a nossa vida. Obrigada, obrigada!",
     type: 'text',
     date: '18/01/2026'
   },
@@ -407,7 +397,7 @@ export const reviews: Review[] = [
   },
   {
     id: 44,
-    author: 'Dani Silva',
+    author: 'Danielle S.',
     verified: true,
     rating: 5,
     text: "Tivemos um ano muito pesado e essa música foi como um fôlego novo. É mais que música, é um lembrete da fidelidade de Deus na nossa história. Vou guardar pra sempre. Vcs têm um dom!",
@@ -436,7 +426,7 @@ export const reviews: Review[] = [
     id: 47,
     author: 'Aline W.',
     verified: true,
-    rating: 4,
+    rating: 4.5,
     text: "Vou ser sincera, não achei que ia soar tão bem. Parece música de rádio, mas é sobre a MINHA família. Tô chocada. Como vcs fazem tão rápido?! Deus com certeza está no negócio!",
     type: 'text',
     date: '02/02/2026'
@@ -473,7 +463,7 @@ export const reviews: Review[] = [
     author: 'Guilherme L.',
     verified: true,
     rating: 4,
-    text: "Fiquei com medo porque esqueci de falar nosso versículo favorito. Mandei mensagem e o pessoal foi super atencioso, conseguiram encaixar na letra! Saber que dá pra ajustar o que a gente esquece tira todo o peso. O resultado? Um pedaço do céu.",
+    text: "Boa experiência de personalização. A letra interpretou bem as informações enviadas e a produção sonora demonstrou um padrão profissional adequado.",
     type: 'text',
     date: '30/01/2026'
   },
@@ -488,10 +478,10 @@ export const reviews: Review[] = [
   },
   {
     id: 53,
-    author: 'Bruno Teixeira',
+    author: 'Breno T.',
     verified: true,
     rating: 5,
-    text: "Teve um detalhezinho que eu quis mudar na primeira versão — só a pronúncia de um nome — e o time foi sensacional. Refizeram sem questionar até ficar do jeito que eu queria. É raro ver um serviço que deixa vc ajustar até ficar perfeito. Minha esposa amou!",
+    text: "Equipe profissional e comprometida com a qualidade do projeto. A produção final atendeu plenamente ao planejamento, apresentando ótima fidelidade de áudio.",
     type: 'text',
     date: '24/01/2026'
   },
@@ -598,7 +588,7 @@ export const reviews: Review[] = [
     id: 65,
     author: 'Cláudia',
     verified: true,
-    rating: 5,
+    rating: 4.5,
     text: "to mto tocada",
     type: 'text',
     date: '01/01/2026'
@@ -607,7 +597,7 @@ export const reviews: Review[] = [
     id: 66,
     author: 'Vini',
     verified: true,
-    rating: 5,
+    rating: 4.5,
     text: "qualidade top",
     type: 'text',
     date: '19/01/2026'
@@ -652,7 +642,7 @@ export const reviews: Review[] = [
     id: 71,
     author: 'Lê',
     verified: true,
-    rating: 4,
+    rating: 4.5,
     text: "recomendo mto",
     type: 'text',
     date: '28/01/2026'
@@ -715,7 +705,7 @@ export const reviews: Review[] = [
     id: 78,
     author: 'Tati',
     verified: true,
-    rating: 5,
+    rating: 4,
     text: "ele chorou kkk",
     type: 'text',
     date: '11/01/2026'
@@ -724,7 +714,7 @@ export const reviews: Review[] = [
     id: 79,
     author: 'Mônica',
     verified: true,
-    rating: 5,
+    rating: 4.5,
     text: "mto mto especial",
     type: 'text',
     date: '21/01/2026'

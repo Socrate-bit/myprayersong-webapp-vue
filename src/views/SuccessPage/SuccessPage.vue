@@ -2,10 +2,12 @@
 import { useRouter, useRoute } from 'vue-router'
 import { onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useFunnelStore } from '@/stores/funnel'
 
 const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
+const store = useFunnelStore()
 
 onMounted(() => {
   const sessionId = route.query.session_id as string
@@ -17,9 +19,12 @@ onMounted(() => {
   }
 
   if (window.fbq) {
+    console.log('purchase logged')
     window.fbq('track', 'Purchase', {
       content_name: 'Custom Prayer Song',
       content_type: 'product',
+      value: store.answers.isExpress ? 238.00 : 159.00,
+      currency: 'BRL'
     }, {
       eventID: sessionId
     })

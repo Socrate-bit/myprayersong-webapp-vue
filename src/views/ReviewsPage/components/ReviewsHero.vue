@@ -7,9 +7,9 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <section class="bg-[var(--color-cream)] py-16 px-4 flex flex-col items-center text-center">
+  <section class="bg-[var(--color-cream)] py-8 md:py-16 px-4 flex flex-col items-center text-center">
     <div class="max-w-4xl w-full">
-      <h1 class="text-4xl md:text-5xl font-serif font-bold text-text-main mb-6">
+      <h1 class="text-3xl md:text-5xl font-serif font-bold text-text-main mb-4 md:mb-6">
         {{ t('reviewsPage.hero.title') }}
       </h1>
       <p class="text-lg md:text-xl text-text-main/80 mb-8 leading-relaxed max-w-2xl mx-auto">

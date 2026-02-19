@@ -38,9 +38,9 @@ const reviewsIn3Cols = computed(() => distributeReviews(sortedReviews.value, 3))
 </script>
 
 <template>
-  <section class="max-w-[1400px] mx-auto px-4 py-12">
+  <section class="max-w-[1400px] mx-auto px-4">
     <!-- Mobile (1 Column) -->
-    <div class="flex flex-col space-y-6 md:hidden">
+    <div class="flex flex-col space-y-4 md:hidden">
       <ReviewCard v-for="review in sortedReviews" :key="review.id" :review="review" />
     </div>
 

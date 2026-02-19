@@ -25,7 +25,7 @@ const messages = {
       subheadline: 'Surpreenda quem você ama com um louvor exclusivo que ficará marcado para sempre no coração',
       cta: 'Criar Minha Música Personalizada',
       delivery: 'Feito com fé, oração e carinho — Entrega em 7 dias',
-      lovedBy: 'Amado por mais de 4.000 famílias'
+      lovedBy: 'Amado por mais de 4.000+ famílias'
     },
     howItWorks: {
       title: 'Como Funciona o {siteName}',
@@ -35,7 +35,7 @@ const messages = {
       cta: 'Começar Minha Música'
     },
     testimonials: {
-      title: 'Histórias Reais da Nossa Comunidade',
+      title: 'Por que mais de 4.000+ clientes amam a {siteName}',
       card: {
         quote: '"Glória a Deus! Isso é verdadeiramente magnífico. Estou ansiosa para fazer essa surpresa no domingo. Vamos ouvir a caminho do culto! Que Deus abençoe esse ministério lindo."',
         author: 'Waleska B.',
@@ -52,7 +52,8 @@ const messages = {
         author: 'Marquise B.',
         songTitle: 'Mais Forte Agora',
         artist: '{siteName}'
-      }
+      },
+      seeMore: 'Veja mais depoimentos'
     },
     giftGrid: {
       title: 'Um Presente para Cada Momento da Vida',
@@ -72,7 +73,7 @@ const messages = {
     whatYouGet: {
       title: 'O Que Você Irá Receber',
       subtitle: 'Assim que terminarmos, você receberá um link exclusivo para ouvir, baixar e compartilhar seu louvor personalizado!',
-      duration: '3:54'
+      duration: '3:47'
     },
     features: {
       radio: {
@@ -99,7 +100,7 @@ const messages = {
         },
         {
           q: 'Qual o prazo de entrega?',
-          a: 'O prazo padrão é de 7 dias. Se tiver pressa, oferecemos o serviço Express de 24 horas por uma taxa adicional, disponível para seleção no momento do checkout.'
+          a: 'O prazo padrão é de 7 dias. Se tiver pressa, oferecemos o serviço Express de 24 horas por uma taxa adicional, disponível para seleção no momento da compra.'
         },
         {
           q: 'Posso pedir para entregar em 24 horas?',
@@ -111,7 +112,7 @@ const messages = {
         },
         {
           q: 'Como as músicas são produzidas?',
-          a: 'Unimos o sentimento humano à tecnologia. Nossos compositores escrevem a letra com base no seu relato e nossos produtores utilizam ferramentas modernas de áudio (incluindo IA assistida) para garantir som de alta qualidade por um preço acessível. Cada obra passa por um controle de qualidade rigoroso.'
+          a: 'Unimos o sentimento humano à tecnologia. Nossos compositores escrevem a letra com base no seu relato e nossos produtores utilizam ferramentas modernas de áudio para garantir som de alta qualidade por um preço acessível. Cada obra passa por um controle de qualidade rigoroso.'
         },
         {
           q: 'Como vou receber a música?',
@@ -131,7 +132,7 @@ const messages = {
       },
       trackOrder: {
         title: 'Suporte',
-        link: 'Acompanhar Pedido'
+        link: 'Rastrear Pedido'
       },
       links: {
         title: 'Links Úteis',
@@ -213,12 +214,46 @@ const messages = {
         privacy: 'Política de Privacidade'
       }
     },
+    promoBanner: {
+      text: 'APROVEITE O FERIADO COM PAZ: 50% DE DESCONTO 🙏'
+    },
+    paymentModal: {
+      changeCountry: 'Alterar país',
+      product: {
+        name: 'Sua Canção Personalizada',
+        author: '{siteName}',
+        priceInfoPreview: 'ou em 12 x de R$ {price} * no cartão'
+      },
+      nameLabel: 'Nome completo',
+      namePlaceholder: 'Digite seu nome completo',
+      emailLabel: 'Seu email',
+      emailPlaceholder: 'Digite seu email para receber a compra',
+      confirmEmailLabel: 'Confirme seu email',
+      confirmEmailPlaceholder: 'Digite novamente seu email',
+      cpfLabel: 'CPF/CNPJ',
+      cpfPlaceholder: 'Digite o número do seu CPF ou CNPJ',
+      couponLabel: 'Tem um cupom de desconto?',
+      paymentMethods: {
+        creditCard: 'Cartão de crédito',
+        pix: 'Pix'
+      },
+      cardNumber: 'Número do cartão',
+      cardNameLabel: 'Nome do titular',
+      cardNamePlaceholder: 'Digite o nome impresso no cartão',
+      cardMonth: 'Mês',
+      cardYear: 'Ano',
+      cardCvv: 'CVV',
+      installmentsLabel: 'Selecione o número de parcelas',
+      purchaseDetails: 'Detalhes da compra',
+      buyNow: 'Comprar agora',
+      securePayment: 'Ambiente Seguro'
+    },
     payment: {
       title: 'Falta Pouco! Finalize seu Pedido',
       subtitle: 'Você está a um passo de criar um presente inesquecível para {name}.',
       deliveryDate: 'Entrega prevista para: {date}',
       emailLabel: 'Seu E-mail de Contato',
-      emailPlaceholder: "voce{'@'}exemplo.com.br",
+      emailPlaceholder: "seu{'@'}email.com.br",
       cta: 'Confirmar e Criar Música',
       guarantee: 'Garantia de Reembolso de 30 dias inclusa',
       summary: {
@@ -226,19 +261,20 @@ const messages = {
         songFor: 'Homenageado:',
         delivery: 'Prazo:',
         customSong: 'Música Personalizada',
-        discount: 'Desconto Especial 50%',
+        discount: '50% DESCONTO',
         originalPrice: '{price}',
         price: '{price}',
         express: 'Entrega Expressa 24h',
         expressDesc: 'Receba amanhã em vez de esperar 7 dias.',
         expressPrice: '+ {price}',
         totalExpress: '{price}',
-        review: 'Revisar Questionário'
+        review: 'Revisar Questionário',
+        guarantee: 'Garantia de Reembolso de 30 dias inclusa'
       },
       discountCard: {
-        title: 'Oferta Especial: Irmãos em Cristo',
-        p1: 'Nossas produções custam normalmente {originalPrice}, mas acreditamos que todo testemunho merece ser celebrado. Por tempo limitado, o valor é {price}.',
-        p2: 'Esse preço reduzido é possível graças ao apoio da nossa comunidade que compartilha da nossa missão de levar o Evangelho através da música.'
+        title: 'Oferta Especial de Feriado 🙏',
+        p1: 'A alegria do Senhor é a nossa força! Normalmente nossas produções custam {originalPrice}, mas neste feriado, seu louvor sai por apenas {price}.',
+        p2: 'Aproveite esta oferta por tempo limitado, válida apenas para esta semana especial, para criar uma lembrança eterna que traz a verdadeira paz ao coração.'
       },
       whatYouGet: {
         title: 'O Que Você Leva',
@@ -257,7 +293,7 @@ const messages = {
       },
       whyChoose: {
         title: 'Por que escolher a {siteName}?',
-        item1: 'Mais de 4.000 famílias impactadas',
+        item1: 'Mais de 4.000+ famílias impactadas',
         item2: 'Satisfação 100% garantida',
         item3: 'Pagamento seguro e criptografado',
         item4: 'Entrega pontual em 7 dias'
@@ -282,20 +318,27 @@ const messages = {
         orderedBy: 'Pedido por',
         songs: [
           {
-            title: 'Enviada por Deus',
-            author: 'Pamela S.',
+            title: 'Presente de Deus',
+            author: 'Luciano P.',
+            audio: '/songs/mariana_woman.mp3',
+            duration: '4:35',
             quote: '"Ficou perfeito. Vocês captaram cada detalhe... nós dois choramos muito ouvindo."'
           },
           {
-            title: 'Graça que Salva',
-            author: 'Waleska B.',
-            quote: '"Qualidade impressionante. Mal posso esperar para mostrar na igreja no domingo."'
+            title: 'Nossa História',
+            author: 'Gabriela S.',
+            audio: '/songs/carlos_woman.mp3',
+            duration: '2:48',
+            quote: '"Um trabalho maravilhoso. O Carlos ficou sem palavras com o presente, foi emocionante demais!"'
           },
           {
-            title: 'Minha Rocha',
-            author: 'Marquise B.',
-            quote: '"Um trabalho maravilhoso. O Davi ficou sem palavras com o presente!"'
-          }
+            title: 'Graça que Salva',
+            author: 'Ricardo O.',
+            audio: '/songs/ana_masculine.mp3',
+            duration: '2:59',
+            quote: '"Qualidade impressionante. Mal posso esperar para mostrar na igreja no próximo culto."'
+          },
+
         ]
       },
       readyToProceed: 'Pronto para continuar?',
@@ -307,7 +350,9 @@ const messages = {
       paymentSuccess: '✓ Sucesso! Seu pedido está sendo processado.',
       genericError: 'Algo deu errado. Por favor, tente novamente.',
       acceptPix: 'Aceitamos Pix',
-      instantApproval: 'Aprovação instantânea'
+      instantApproval: 'Aprovação instantânea',
+      generatingLink: 'Gerando Link Seguro...',
+      securePayment: 'Pagamento Seguro'
     },
     legal: {
       header: {
@@ -483,9 +528,9 @@ const messages = {
     },
     reviewsPage: {
       hero: {
-        title: 'Mais de 4.000 Histórias de Fé',
+        title: 'Mais de 4.000+ Histórias de Fé',
         subtitle: 'Veja por que tantas famílias confiam na {siteName} para criar homenagens que tocam a alma.',
-        verified: 'Avaliações Reais',
+        verified: 'Depoimentos Reais',
         happyCustomers: '4.000+ Clientes Felizes',
         cta: 'Começar Minha Música'
       },
@@ -494,14 +539,24 @@ const messages = {
       },
       ctaSection: {
         cta: 'Quero Minha Música Personalizada'
+      },
+      shareExperience: {
+        title: 'Como foi sua experiência com a {siteName}?',
+        subtitle: 'Sua música já chegou? Queremos muito conhecer a emoção desse momento!',
+        card: {
+          title: 'Conte sua História',
+          text1: 'Compartilhe seu relato através do e-mail {email} para que possamos inspirar outras famílias!',
+          text2: 'Deseja nos enviar um vídeo de reação? Caso o arquivo seja pesado, solicite um link exclusivo de upload enviando um e-mail com o assunto "Meu Relato {siteName}".',
+          cta: 'Quero Compartilhar'
+        }
       }
     },
     trackOrder: {
-      title: 'Acompanhar Meu Pedido',
+      title: 'Rastrear Meu Pedido',
       subtitle: 'Digite seu e-mail para ver o status da sua música.',
       guarantee: {
         title: 'Sua música será entregue!',
-        text: 'Temos 100% de taxa de entrega. Se não encontrar o e-mail, verifique sua caixa de spam ou fale conosco. Respondemos em até 24h.',
+        text: 'Temos 100% de taxa de entrega. Se não encontrar o e-mail, verifique sua caixa de spam ou fale conosco em {email}. Respondemos em até 24h.',
         email: "{email}"
       },
       form: {
