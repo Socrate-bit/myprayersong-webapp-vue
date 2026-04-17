@@ -246,11 +246,15 @@ const messages = {
       installmentsLabel: 'Selecione o número de parcelas',
       purchaseDetails: 'Detalhes da compra',
       buyNow: 'Comprar agora',
-      securePayment: 'Ambiente Seguro'
+      securePayment: 'Compra 100% Segura',
+      lgpdProtection: 'Seus dados estão protegidos pela LGPD e o pagamento é processado com segurança via dLocal',
+      copyright: '© CançãoOração. Todos os direitos reservados.',
+      invalidDocumentError: 'CPF/CNPJ inválido. Verifique o documento e tente novamente.',
+      paymentDeclinedError: 'Pagamento recusado. Verifique os dados e tente novamente.'
     },
     payment: {
       title: 'Falta Pouco! Finalize seu Pedido',
-      subtitle: 'Você está a um passo de criar um presente inesquecível para {name}.',
+      subtitle: 'Você está a um passo de criar um presente inesquecível para {name} 💝',
       deliveryDate: 'Entrega prevista para: {date}',
       emailLabel: 'Seu E-mail de Contato',
       emailPlaceholder: "seu{'@'}email.com.br",
@@ -262,6 +266,7 @@ const messages = {
         delivery: 'Prazo:',
         customSong: 'Música Personalizada',
         discount: '50% DESCONTO',
+        discountUrgency: '[ÚLTIMO DIA]',
         originalPrice: '{price}',
         price: '{price}',
         express: 'Entrega Expressa 24h',
@@ -270,6 +275,14 @@ const messages = {
         totalExpress: '{price}',
         review: 'Revisar Questionário',
         guarantee: 'Garantia de Reembolso de 30 dias inclusa'
+      },
+      urgency: {
+        title: 'ATENÇÃO',
+        justification: 'Devido à altíssima demanda desta semana, limitamos nossas vagas para garantir nosso padrão de qualidade.',
+        status: 'Pedidos restantes esta semana',
+        spotsUsed: '{used}/{total} pedidos preenchidos',
+        reserved: 'Seu pedido está reservado por',
+        expired: 'Reserva expirada. Finalize agora para garantir seu pedido.',
       },
       discountCard: {
         title: 'Oferta Especial de Feriado 🙏',
@@ -297,6 +310,13 @@ const messages = {
         item2: 'Satisfação 100% garantida',
         item3: 'Pagamento seguro e criptografado',
         item4: 'Entrega pontual em 7 dias'
+      },
+      authority: {
+        title: 'Quem Somos',
+        badge1: '4.000+ famílias impactadas',
+        badge2: 'Músicos e compositores cristãos',
+        badge3: 'Produção profissional de estúdio',
+        desc: 'Somos um grupo de quatro apaixonados pela música cristã que acredita no poder do louvor para transformar vidas. Nosso propósito é transbordar a alegria do Senhor nas famílias, unindo pessoas através de canções que seguem a ordem e o querer de Deus. Mais do que uma plataforma, somos um ministério dedicado a eternizar sua caminhada com Cristo e seus momentos mais preciosos em forma de adoração.'
       },
       guaranteeFull: {
         title: 'Garantia de Satisfação Total',
@@ -378,7 +398,7 @@ const messages = {
           },
           company: {
             title: '2. Informações da Empresa',
-            content: "A {siteName} é uma sociedade de responsabilidade limitada que opera a plataforma {siteUrl}. Todos os serviços são prestados pela {siteName}. Para qualquer dúvida ou preocupação, entre em contato conosco pelo e-mail {email}."
+            content: "A {siteName} é uma marca operada pela ECOM-PARIS LC, sociedade de responsabilidade limitada registrada nos Estados Unidos sob o EIN 93-2737442. A ECOM-PARIS LC opera a plataforma {siteUrl} e é responsável pela prestação de todos os serviços oferecidos sob a marca {siteName}. Para qualquer dúvida ou preocupação, entre em contato conosco pelo e-mail {email}."
           },
           services: {
             title: '3. Descrição dos Serviços',
@@ -566,9 +586,8 @@ const messages = {
         notFound: 'Não encontramos nenhum pedido com este e-mail.'
       },
       status: {
-        checkout: 'Aguardando Pagamento',
-        pending: 'Pendente',
-        processing: 'Em Produção',
+        waitingPayment: 'Aguardando Pagamento',
+        confirmed: 'Confirmado — Em Produção',
         completed: 'Concluído'
       },
       popup: {

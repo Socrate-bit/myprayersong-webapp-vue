@@ -11,6 +11,7 @@ import PaymentGuarantee from './components/PaymentGuarantee.vue'
 import PaymentSocialProof from './components/PaymentSocialProof.vue'
 import PaymentForm from './components/PaymentForm.vue'
 import EditOrderModal from './components/EditOrderModal.vue'
+import PaymentAuthority from './components/PaymentAuthority.vue'
 const logo = LOGO_URL
 
 import ReviewsGrid from '../ReviewsPage/components/ReviewsGrid.vue'
@@ -53,11 +54,16 @@ const deliveryDate = computed(() => {
 
       <!-- Date Badge -->
       <div
-        class="inline-block bg-secondary text-white font-bold px-4 py-1.5 md:px-6 md:py-2 rounded-full shadow-md text-xs md:text-base transition-all duration-300">
+        class="inline-block bg-secondary text-white font-bold px-4 py-1.5 md:px-6 md:py-2 mb-2 rounded-full shadow-md text-xs md:text-base transition-all duration-300">
         {{ t('payment.deliveryDate', { date: deliveryDate }) }}
         <span v-if="store.answers.isExpress"
           class="ml-1 text-yellow-300 text-xs uppercase tracking-wider font-extrabold">(Express)</span>
       </div>
+    </div>
+
+    <!-- Order Summary (mobile only, top of page) -->
+    <div class="lg:hidden w-full max-w-6xl px-4">
+      <OrderSummary @open-edit="showEditModal = true" />
     </div>
 
     <!-- Main Content Grid -->
@@ -73,14 +79,18 @@ const deliveryDate = computed(() => {
 
       <!-- Left Column: Info & Trust (Mobile Bottom, Desktop Left) -->
       <div class="order-2 lg:order-1 lg:col-span-1 space-y-4 md:space-y-8">
-        <OrderSummary @open-edit="showEditModal = true" />
+        <div class="hidden lg:block">
+          <OrderSummary @open-edit="showEditModal = true" />
+        </div>
         <DiscountCard />
+        <PaymentAuthority />
         <PaymentSocialProof />
         <PaymentGuarantee />
         <div class="lg:hidden">
           <PaymentForm />
           <!-- <PaymentPix class="mt-2 md:mt-4" /> -->
         </div>
+
         <PaymentWhatYouGet />
         <PaymentWhyChoose />
       </div>

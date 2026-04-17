@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useFunnelStore } from '../../../stores/funnel'
 import { useI18n } from 'vue-i18n'
-// import { db } from '../../../services/firebase'
-// import { collection, addDoc } from 'firebase/firestore'
+import { db, functions } from '../../../services/firebase'
+import { doc, setDoc } from 'firebase/firestore'
+import { httpsCallable } from 'firebase/functions'
 import { sha256 } from '../../../utils/crypto'
 import HotmartModal from './HotmartModal.vue'
+import { usePostHog } from '@/composables/usePostHog'
+import { useUrgencyTimer } from '@/composables/useUrgencyTimer'
 
 declare global {
   interface Window {
@@ -17,8 +20,9 @@ declare global {
 const store = useFunnelStore()
 const { t } = useI18n()
 const router = useRouter()
+const { posthog } = usePostHog()
+const { start: startUrgencyTimer } = useUrgencyTimer()
 
-// Email state
 const email = ref('')
 const isSubmitting = ref(false)
 const submitError = ref('')
@@ -26,65 +30,96 @@ const submitSuccess = ref(false)
 const isHotmartModalOpen = ref(false)
 const hotmartModalRef = ref<InstanceType<typeof HotmartModal> | null>(null)
 
-// No listeners needed for custom checkout
+// Pre-warmed dlocal session (no Firestore doc yet)
+const preOrderId = ref('')
+const preDlocalId = ref('')
+const preCheckoutToken = ref('')
+const preSmartFieldsKey = ref('')
 
-// Submit payment logic
+const prewarm = async () => {
+  try {
+    console.log('prewarm')
+    const fn = httpsCallable<object, {
+      checkoutToken: string; orderId: string; dlocalId: string; smartFieldsKey: string
+    }>(functions, 'createDlocalTransparentPayment')
+    const result = await fn({ isExpress: store.answers.isExpress, origin: window.location.origin })
+    preOrderId.value = result.data.orderId
+    preDlocalId.value = result.data.dlocalId
+    preCheckoutToken.value = result.data.checkoutToken
+    preSmartFieldsKey.value = result.data.smartFieldsKey
+  } catch (err) {
+    console.error('Payment pre-warm error:', err)
+  }
+}
+
+const preloadDlocalSdk = () => {
+  if (window.dlocalGo) return
+  const script = document.createElement('script')
+  script.src = 'https://checkout.dlocalgo.com/js/dlocalgo-smartfields-bundled.js'
+  document.head.appendChild(script)
+}
+
+onMounted(() => {
+  preloadDlocalSdk()
+  // prewarm()
+})
+
+const handleEmailFocus = () => {
+  posthog.capture('start_enter_email')
+}
+
 const handlePayment = async () => {
-  if (!email.value) {
-    submitError.value = t('payment.emailRequiredError')
-    return
-  }
+  posthog.capture('checkout_clicked')
+  startUrgencyTimer()
+  if (!email.value) { submitError.value = t('payment.emailRequiredError'); return }
+  if (!email.value.includes('@')) { submitError.value = t('payment.validEmailError'); return }
 
-  if (!email.value.includes('@')) {
-    submitError.value = t('payment.validEmailError')
-    return
-  }
-
-  // Hash email for Pixel tracking
   const normalizedEmail = email.value.trim().toLowerCase()
   const hashedEmail = await sha256(normalizedEmail)
-
-  // Save hashed email for Pixel tracking on success page
   localStorage.setItem('user_email_for_pixel', hashedEmail)
 
-  // Track InitiateCheckout with email (Advanced Matching)
   if (window.fbq) {
-    console.log('Tracking InitiateCheckout with email:', hashedEmail)
     window.fbq('set', 'userData', { em: hashedEmail })
     window.fbq('track', 'InitiateCheckout')
   }
 
   isSubmitting.value = true
   submitError.value = ''
-
-  // Send order data to Firebase
   try {
-    // const paymentData = {
-    //   email: email.value,
-    //   recipient: store.answers.recipient,
-    //   recipientName: store.answers.recipientName,
-    //   genre: store.answers.genre,
-    //   voiceGender: store.answers.voiceGender,
-    //   qualities: store.answers.qualities,
-    //   memories: store.answers.memories,
-    //   specialMessage: store.answers.specialMessage,
-    //   createdAt: new Date().toISOString(),
-    //   status: 'checkout'
+    // if (!preOrderId.value || !preCheckoutToken.value) {
+    // Fallback: pre-warm not done yet, call backend now
+    const fn = httpsCallable<object, {
+      checkoutToken: string; orderId: string; dlocalId: string; smartFieldsKey: string
+    }>(functions, 'createDlocalTransparentPayment')
+    const result = await fn({ isExpress: store.answers.isExpress, origin: window.location.origin })
+    preOrderId.value = result.data.orderId
+    preDlocalId.value = result.data.dlocalId
+    preCheckoutToken.value = result.data.checkoutToken
+    preSmartFieldsKey.value = result.data.smartFieldsKey
     // }
 
-    // Create initial document
-    // const docRef = await addDoc(collection(db, 'payments'), paymentData)
-    // const paymentId = docRef.id
-    // currentPaymentId.value = paymentId
-    // console.log('Payment ID:', currentPaymentId.value)
-
-    // Open Custom Modal
+    // Create the Firestore doc with the pre-warmed orderId as the document ID
+    await setDoc(doc(db, 'payments', preOrderId.value), {
+      email: email.value,
+      dlocalId: preDlocalId.value,
+      recipientName: store.answers.recipientName,
+      recipient: store.answers.recipient,
+      genre: store.answers.genre,
+      voiceGender: store.answers.voiceGender,
+      qualities: store.answers.qualities,
+      memories: store.answers.memories,
+      specialMessage: store.answers.specialMessage,
+      isExpress: store.answers.isExpress,
+      amount: store.answers.isExpress ? 187 : 147,
+      gateway: 'dlocal_transparent',
+      status: 'checkout',
+      createdAt: new Date().toISOString(),
+    })
     isHotmartModalOpen.value = true
-    isSubmitting.value = false
-
-  } catch (error) {
-    console.error('Error initiating checkout:', error)
+  } catch (err) {
+    console.error('Error opening checkout:', err)
     submitError.value = t('payment.genericError')
+  } finally {
     isSubmitting.value = false
   }
 }
@@ -113,7 +148,7 @@ defineExpose({ handlePayment })
       {{ t('payment.emailLabel') }}
     </label>
     <input v-model="email" type="email" :placeholder="t('payment.emailPlaceholder')"
-      :disabled="isSubmitting || submitSuccess"
+      :disabled="isSubmitting || submitSuccess" @focus.once="handleEmailFocus"
       class="w-full px-4 py-3 md:px-5 md:py-4 rounded-xl border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-base md:text-lg transition-colors placeholder:text-gray-400 bg-gray-50 mb-2" />
 
     <!-- Error Message -->
@@ -148,8 +183,9 @@ defineExpose({ handlePayment })
       {{ t('payment.guarantee') }}
     </div>
 
-    <!-- Custom Checkout Modal (Replica) -->
+    <!-- Custom Checkout Modal -->
     <HotmartModal ref="hotmartModalRef" :is-open="isHotmartModalOpen" :email="email" :name="store.answers.recipientName"
+      :pre-payment-id="preOrderId" :pre-checkout-token="preCheckoutToken" :pre-smart-fields-key="preSmartFieldsKey"
       @close="isHotmartModalOpen = false" @success="onPaymentSuccess" @error="onPaymentError" />
   </div>
 </template>

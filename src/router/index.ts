@@ -68,6 +68,10 @@ router.afterEach(() => {
   if (window.fbq) {
     window.fbq('track', 'PageView');
   }
+
+  posthog.capture('page_view', {
+    url: window.location.href
+  })
 })
 
 export default router

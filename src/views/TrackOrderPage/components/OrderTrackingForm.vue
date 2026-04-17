@@ -36,16 +36,14 @@ const checkOrderStatus = async () => {
     if (!querySnapshot.empty) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const doc = querySnapshot.docs[0]?.data() as any
-      // Map the status to something user friendly
-      const statusMap: Record<string, string> = {
-        'checkout': t('trackOrder.status.checkout'),
-        'pending': t('trackOrder.status.pending'),
-        'processing': t('trackOrder.status.processing'),
-        'completed': t('trackOrder.status.completed')
-      }
+      const statusLabel = doc.status === 'completed'
+        ? t('trackOrder.status.completed')
+        : doc.status === 'confirmed'
+          ? t('trackOrder.status.confirmed')
+          : t('trackOrder.status.waitingPayment')
 
       orderStatus.value = {
-        status: statusMap[doc.status] || doc.status || t('trackOrder.status.processing'),
+        status: statusLabel,
         date: doc.createdAt ? new Date(doc.createdAt).toLocaleDateString(locale.value) : 'N/A',
         recipient: doc.recipientName || t('payment.defaultLovedOne')
       }

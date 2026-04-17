@@ -17,7 +17,7 @@ const { t } = useI18n()
         <p class="text-text-main mb-4 leading-relaxed">
           <i18n-t keypath="payment.discountCard.p1" tag="span">
             <template #originalPrice>
-              <span class="line-through opacity-70">{{ t('payment.summary.originalPrice', { price: PRICE_ORIGINAL })
+              <span class="line-through">{{ t('payment.summary.originalPrice', { price: PRICE_ORIGINAL })
                 }}</span>
             </template>
             <template #price>
@@ -25,7 +25,7 @@ const { t } = useI18n()
             </template>
           </i18n-t>
         </p>
-        <p class="text-text-main font-bold text-sm leading-relaxed opacity-90">
+        <p class="text-text-main font-bold text-sm leading-relaxed">
           {{ t('payment.discountCard.p2') }}
         </p>
       </div>

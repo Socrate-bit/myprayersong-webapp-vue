@@ -2,8 +2,9 @@
 defineOptions({
   name: 'LandingPage'
 })
-import { onDeactivated } from 'vue'
+import { onMounted, onDeactivated } from 'vue'
 import { useAudioStore } from '@/stores/audio'
+import { usePostHog } from '@/composables/usePostHog'
 import PromoBanner from './components/PromoBanner.vue'
 import AppHeader from './components/AppHeader.vue'
 import HeroSection from './components/HeroSection.vue'
@@ -17,6 +18,11 @@ import FAQSection from './components/FAQSection.vue'
 import AppFooter from './components/AppFooter.vue'
 
 const audioStore = useAudioStore()
+const { posthog } = usePostHog()
+
+onMounted(() => {
+  posthog.capture('landing_page_start')
+})
 
 onDeactivated(() => {
   audioStore.pause()

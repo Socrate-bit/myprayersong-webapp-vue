@@ -46,7 +46,7 @@ const emit = defineEmits<{
     <div class="space-y-3 mb-6 border-b border-[#F2F0E9] pb-6">
       <div class="flex justify-between items-center text-text-main/80 font-medium">
         <span>{{ t('payment.summary.songFor') }}</span>
-        <span class="text-secondary font-bold">{{ store.answers.recipientName || 'Your Love' }}</span>
+        <span class="text-text-main font-bold">{{ store.answers.recipientName || 'Your Love' }}</span>
       </div>
       <div class="flex justify-between items-center text-text-main/80 font-medium">
         <span>{{ t('payment.summary.delivery') }}</span>
@@ -60,15 +60,16 @@ const emit = defineEmits<{
     <h4 class="font-bold text-lg mb-2">{{ t('payment.summary.customSong') }}</h4>
     <div class="flex items-center justify-between mb-8">
       <span
-        class="bg-white border border-secondary/30 text-secondary text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+        class="bg-[var(--color-primary)]/20 border border-[var(--color-primary)] text-text-main text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider flex flex-col items-center leading-tight">
         {{ t('payment.summary.discount') }}
+        <span class="text-[10px] font-extrabold tracking-widest text-red-600">{{ t('payment.summary.discountUrgency') }}</span>
       </span>
       <div class="text-right">
-        <span class="text-gray-400 line-through mr-2 text-lg">{{ t('payment.summary.originalPrice', {
+        <span class="text-gray-400 line-through mr-2 text-base">{{ t('payment.summary.originalPrice', {
           price:
             PRICE_ORIGINAL
         }) }}</span>
-        <span class="text-secondary font-bold text-xl md:text-2xl">{{ displayedPrice }}</span>
+        <span class="text-secondary font-bold text-2xl md:text-3xl">{{ displayedPrice }}</span>
       </div>
     </div>
 
@@ -81,7 +82,7 @@ const emit = defineEmits<{
       <label for="express-delivery" class="cursor-pointer flex-1">
         <div class="flex justify-between items-center">
           <span class="font-bold text-text-main">{{ t('payment.summary.express') }}</span>
-          <span class="font-bold text-secondary">{{ t('payment.summary.expressPrice', { price: PRICE_EXPRESS_UPGRADE })
+          <span class="font-bold text-text-main">{{ t('payment.summary.expressPrice', { price: PRICE_EXPRESS_UPGRADE })
           }}</span>
         </div>
         <p class="text-sm text-text-muted mt-1">{{ t('payment.summary.expressDesc') }}</p>
@@ -90,9 +91,9 @@ const emit = defineEmits<{
 
     <!-- Edit Button -->
     <button @click="emit('open-edit')"
-      class="w-full bg-secondary/10 hover:bg-secondary/20 border border-secondary/30 text-secondary font-bold py-2.5 md:py-3 rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer">
+      class="w-full bg-secondary/10 hover:bg-secondary/20 border border-secondary/30 text-text-main font-bold py-2.5 md:py-3 rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-        class="w-4 h-4">
+        class="w-4 h-4 text-text-main">
         <path stroke-linecap="round" stroke-linejoin="round"
           d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
       </svg>

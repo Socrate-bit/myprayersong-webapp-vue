@@ -120,7 +120,7 @@ export const stripeWebhook = onRequest(
       if (paymentId) {
         try {
           await db.collection("payments").doc(paymentId).update({
-            status: "pending",
+            status: "confirmed",
             stripeSessionId: session.id,
             paidAt: new Date().toISOString(),
           });
@@ -141,81 +141,19 @@ const dlocalKey = defineSecret("DLOCAL_API_KEY");
 const dlocalSecret = defineSecret("DLOCAL_API_SECRET");
 const dlocalSmartFieldsKey = defineSecret("DLOCAL_SMARTFIELDS_KEY");
 
-export const createDlocalCheckout = onCall(
-  { secrets: [dlocalKey, dlocalSecret], cors: true },
-  async (request) => {
-    const { email, isExpress, origin, paymentId } = request.data;
-
-    if (!email) {
-      throw new HttpsError(
-        "invalid-argument",
-        "The function must be called with an email."
-      );
-    }
-
-    const baseUrl = origin || "http://localhost:5173";
-    const amount = isExpress ? 238 : 159;
-
-    const projId = process.env.GCLOUD_PROJECT || "myprayersong-428ef";
-    const notificationUrl =
-      `https://us-central1-${projId}.cloudfunctions.net/dlocalWebhook`;
-
-    try {
-      const response = await fetch("https://api.dlocalgo.com/v1/payments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${dlocalKey.value()}:${dlocalSecret.value()}`,
-        },
-        body: JSON.stringify({
-          currency: "BRL",
-          amount: amount,
-          country: "BR",
-          order_id: paymentId,
-          description: "Canção Personalizada - CançãoOração " +
-            (isExpress ? "(Express - 24h)" : "(Padrão)"),
-          success_url: `${baseUrl}/success?session_id=${paymentId}`,
-          back_url: `${baseUrl}/payment`,
-          notification_url: notificationUrl,
-          payer: {
-            email: email,
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        logger.error("Dlocal API Error", errorData);
-        throw new Error(errorData.message || "Failed to create Dlocal payment");
-      }
-
-      const data = await response.json() as
-        { redirect_url: string, id: string };
-
-      if (paymentId) {
-        await db.collection("payments").doc(paymentId).update({
-          dlocalId: data.id,
-          gateway: "dlocal",
-        });
-      }
-
-      return { url: data.redirect_url };
-    } catch (error: unknown) {
-      const err = error as Error;
-      logger.error("Dlocal Checkout Error", err);
-      throw new HttpsError("internal", err.message);
-    }
-  }
-);
 
 export const dlocalWebhook = onRequest(
   async (req, res) => {
     const { order_id: orderId, status } = req.body;
     if (status === "PAID" || status === "SUCCESS") {
       if (orderId) {
+        // pixOrderId format: {paymentId}_pix_{timestamp} — extract the real doc ID
+        const paymentDocId = orderId.includes("_pix_") ?
+          orderId.split("_pix_")[0] :
+          orderId;
         try {
-          await db.collection("payments").doc(orderId).update({
-            status: "pending",
+          await db.collection("payments").doc(paymentDocId).update({
+            status: "confirmed",
             paidAt: new Date().toISOString(),
             updatedBy: "dlocal_webhook",
           });
@@ -231,31 +169,16 @@ export const dlocalWebhook = onRequest(
 export const createDlocalTransparentPayment = onCall(
   { secrets: [dlocalKey, dlocalSecret, dlocalSmartFieldsKey], cors: true },
   async (request) => {
-    const {
-      email, isExpress, origin,
-      recipientName, recipient, genre, voiceGender,
-      qualities, memories, specialMessage,
-    } = request.data;
+    const { isExpress, origin } = request.data;
 
-    if (!email) {
-      throw new HttpsError("invalid-argument", "Email is required.");
-    }
-
-    const amount = isExpress ? 238 : 159;
+    const amount = isExpress ? 187 : 147;
     const baseUrl = origin || "http://localhost:5173";
     const projId = process.env.GCLOUD_PROJECT || "myprayersong-428ef";
     const notificationUrl =
       `https://us-central1-${projId}.cloudfunctions.net/dlocalWebhook`;
 
-    // Create Firestore doc first to use its ID as order_id
-    const docRef = await db.collection("payments").add({
-      email, recipientName, recipient, genre, voiceGender,
-      qualities, memories, specialMessage, isExpress, amount,
-      gateway: "dlocal_transparent",
-      status: "checkout",
-      createdAt: new Date().toISOString(),
-    });
-    const paymentId = docRef.id;
+    // Generate a Firestore-compatible ID without writing any document
+    const orderId = db.collection("payments").doc().id;
 
     try {
       const response = await fetch("https://api.dlocalgo.com/v1/payments", {
@@ -268,14 +191,13 @@ export const createDlocalTransparentPayment = onCall(
           currency: "BRL",
           amount,
           country: "BR",
-          order_id: paymentId,
+          order_id: orderId,
           description: "Canção Personalizada - CançãoOração " +
             (isExpress ? "(Express - 24h)" : "(Padrão)"),
-          success_url: `${baseUrl}/success?session_id=${paymentId}`,
+          success_url: `${baseUrl}/success?session_id=${orderId}`,
           back_url: `${baseUrl}/payment`,
           notification_url: notificationUrl,
           allow_transparent: true,
-          payer: { email },
         }),
       });
 
@@ -288,15 +210,13 @@ export const createDlocalTransparentPayment = onCall(
       const data = await response.json() as
         { merchant_checkout_token: string; id: string };
 
-      await docRef.update({ dlocalId: data.id });
-
       return {
         checkoutToken: data.merchant_checkout_token,
-        paymentId,
+        orderId,
+        dlocalId: data.id,
         smartFieldsKey: dlocalSmartFieldsKey.value(),
       };
     } catch (error) {
-      await docRef.update({ status: "error" });
       const err = error as Error;
       logger.error("Dlocal Transparent Payment Error", err);
       throw new HttpsError("internal", err.message);
@@ -346,18 +266,28 @@ export const confirmDlocalCardPayment = onCall(
         { status: string; redirect_url?: string; message?: string };
 
       if (!response.ok) {
+        const errorMessage = data.message || "Payment confirmation failed";
         logger.error("Dlocal Confirm Payment Error", data);
-        throw new Error(data.message || "Payment confirmation failed");
+        if (paymentId) {
+          await db.collection("payments").doc(paymentId).update({
+            status: "error",
+            lastError: errorMessage,
+            updatedAt: new Date().toISOString(),
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
+          }).catch(() => { });
+        }
+        throw new HttpsError("internal", errorMessage);
       }
 
       if (paymentId) {
         const statusMap: Record<string, string> = {
-          PAID: "pending_card",
+          PAID: "confirmed",
           PENDING: "pending_card",
           REJECTED: "rejected",
         };
         await db.collection("payments").doc(paymentId).update({
-          status: statusMap[data.status] || "processing",
+          status: statusMap[data.status] || "pending_card",
+          email: clientEmail,
           updatedAt: new Date().toISOString(),
         });
       }
@@ -367,8 +297,17 @@ export const confirmDlocalCardPayment = onCall(
         redirectUrl: data.redirect_url ?? null,
       };
     } catch (error) {
+      if (error instanceof HttpsError) throw error;
       const err = error as Error;
       logger.error("Dlocal Confirm Card Error", err);
+      if (paymentId) {
+        await db.collection("payments").doc(paymentId).update({
+          status: "error",
+          lastError: err.message,
+          updatedAt: new Date().toISOString(),
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+        }).catch(() => { });
+      }
       throw new HttpsError("internal", err.message);
     }
   }
@@ -378,21 +317,25 @@ export const createPixPayment = onCall(
   { secrets: [dlocalKey, dlocalSecret], cors: true },
   async (request) => {
     const {
-      email, name, document: cpfDoc, isExpress, origin, paymentId,
+      email, name, document: cpfDoc, documentType, isExpress, origin, paymentId,
     } = request.data;
 
     if (!email || !paymentId) {
       throw new HttpsError("invalid-argument", "Email and paymentId are required.");
     }
 
-    const amount = isExpress ? 238 : 159;
+    console.log("Pix Payment Request", request.data);
+
+    const amount = isExpress ? 187 : 147;
     const baseUrl = origin || "http://localhost:5173";
     const projId = process.env.GCLOUD_PROJECT || "myprayersong-428ef";
     const notificationUrl =
       `https://us-central1-${projId}.cloudfunctions.net/dlocalWebhook`;
 
     const docRef = db.collection("payments").doc(paymentId);
-    await docRef.update({ gateway: "dlocal_pix", status: "pending_pix" });
+    const pixOrderId = `${paymentId}_pix_${Date.now()}`;
+    console.log("Pix order ID:", pixOrderId);
+    await docRef.update({ gateway: "dlocal_pix", status: "pending_pix", pixOrderId });
 
     try {
       const response = await fetch("https://api.dlocalgo.com/v1/payments", {
@@ -406,7 +349,7 @@ export const createPixPayment = onCall(
           amount,
           country: "BR",
           payment_type: "VOUCHER",
-          order_id: paymentId,
+          order_id: pixOrderId,
           description: "Canção Personalizada - CançãoOração " +
             (isExpress ? "(Express - 24h)" : "(Padrão)"),
           success_url: `${baseUrl}/success?session_id=${paymentId}`,
@@ -415,7 +358,8 @@ export const createPixPayment = onCall(
           payer: {
             name: name || email,
             email,
-            document: cpfDoc ? cpfDoc.replace(/\D/g, "") : undefined,
+            document_type: documentType || "CPF",
+            document: cpfDoc || undefined,
           },
         }),
       });
@@ -426,16 +370,17 @@ export const createPixPayment = onCall(
         throw new Error(err.message || "Failed to create Pix payment");
       }
 
-      const data = await response.json() as { redirect_url: string; checkout_url?: string; id: string };
-      console.log('Dlocal Pix Payment Response', data);
-      await docRef.update({ dlocalId: data.id, status: "pending" });
+      const data = await response.json() as
+        { redirect_url: string; checkout_url?: string; id: string };
+      console.log("Dlocal Pix Payment Response", data);
+      await docRef.update({ dlocalId: data.id, status: "pending_pix" });
 
       const checkoutUrl = data.redirect_url || data.checkout_url;
       if (!checkoutUrl) throw new Error("No redirect URL in Dlocal Pix response");
 
       return { checkoutUrl, paymentId };
     } catch (error) {
-      await docRef.update({ status: "error" });
+      await docRef.update({ status: "error", lastError: (error as Error).message });
       const err = error as Error;
       logger.error("Dlocal Pix Payment Error", err);
       throw new HttpsError("internal", err.message);

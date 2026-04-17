@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { ref, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useUrgencyTimer } from '@/composables/useUrgencyTimer'
 import { httpsCallable } from 'firebase/functions'
-import { functions } from '../../../services/firebase'
+import { addDoc, collection } from 'firebase/firestore'
+import { db, functions } from '../../../services/firebase'
 import { useFunnelStore } from '../../../stores/funnel'
-import { PRICE_NOW, PRICE_EXPRESS } from '@/constants'
+import { PRICE_NOW, PRICE_EXPRESS, PRICE_ORIGINAL } from '@/constants'
+import { usePostHog } from '@/composables/usePostHog'
 
 declare global {
   interface Window {
@@ -34,15 +37,20 @@ const props = defineProps<{
   isOpen: boolean
   email: string
   name: string
+  prePaymentId?: string
+  preCheckoutToken?: string
+  preSmartFieldsKey?: string
 }>()
 
 const emit = defineEmits(['close', 'success', 'error'])
 
 const { t } = useI18n()
+const { isExpired, formatted } = useUrgencyTimer()
 const store = useFunnelStore()
+const { posthog } = usePostHog()
 
 // Form state
-const fullName = ref(props.name)
+const fullName = ref('')
 const localEmail = ref(props.email)
 const confirmEmail = ref(props.email)
 const cpf = ref('')
@@ -63,6 +71,7 @@ const isSmartFieldsReady = ref(false)
 // Submission state
 const isSubmitting = ref(false)
 const errors = ref<Record<string, string>>({})
+const paymentError = ref('')
 
 // Sync props
 watch(() => props.email, (v) => { localEmail.value = v; confirmEmail.value = v })
@@ -71,10 +80,21 @@ watch(() => props.name, (v) => { fullName.value = v })
 // Init / cleanup on modal open/close
 watch(() => props.isOpen, async (open) => {
   if (open) {
+    const scrollY = window.scrollY
+    document.body.style.position = 'fixed'
+    document.body.style.top = `-${scrollY}px`
+    document.body.style.width = '100%'
+    document.body.style.overflow = 'hidden'
     errors.value = {}
     initError.value = ''
     await initPayment()
   } else {
+    const scrollY = parseInt(document.body.style.top || '0') * -1
+    document.body.style.position = ''
+    document.body.style.top = ''
+    document.body.style.width = ''
+    document.body.style.overflow = ''
+    window.scrollTo(0, scrollY)
     cleanup()
   }
 })
@@ -86,8 +106,7 @@ const cleanup = () => {
   panField.value = null
   expirationField.value = null
   cvvField.value = null
-  checkoutToken.value = ''
-  paymentId.value = ''
+  // Keep checkoutToken/paymentId so re-opening is instant
   dlocalInstallments.value = []
   selectedInstallmentId.value = ''
   isSmartFieldsReady.value = false
@@ -105,16 +124,29 @@ const loadSdk = (): Promise<void> => {
 }
 
 const initPayment = async () => {
-  isLoading.value = true
   initError.value = ''
+
+  // Fast path: pre-warmed data available from page load
+  if (props.preCheckoutToken && props.prePaymentId && props.preSmartFieldsKey) {
+    checkoutToken.value = props.preCheckoutToken
+    paymentId.value = props.prePaymentId
+    await loadSdk()
+    await nextTick()
+    await initSmartFields(props.preSmartFieldsKey)
+    return
+  }
+
+  // Re-use already-fetched session (e.g. modal re-opened)
+  if (checkoutToken.value && paymentId.value) {
+    await nextTick()
+    await initSmartFields(props.preSmartFieldsKey ?? '')
+    return
+  }
+
+  // Fallback: pre-warm didn't finish in time, do a full init with loading state
+  isLoading.value = true
   try {
-    const fn = httpsCallable<object, { checkoutToken: string; paymentId: string; smartFieldsKey: string }>(
-      functions, 'createDlocalTransparentPayment'
-    )
-    const result = await fn({
-      email: props.email,
-      isExpress: store.answers.isExpress,
-      origin: window.location.origin,
+    const docRef = await addDoc(collection(db, 'payments'), {
       recipientName: store.answers.recipientName,
       recipient: store.answers.recipient,
       genre: store.answers.genre,
@@ -122,12 +154,22 @@ const initPayment = async () => {
       qualities: store.answers.qualities,
       memories: store.answers.memories,
       specialMessage: store.answers.specialMessage,
+      isExpress: store.answers.isExpress,
+      amount: store.answers.isExpress ? 238 : 159,
+      gateway: 'dlocal_transparent',
+      status: 'checkout',
+      createdAt: new Date().toISOString(),
     })
-
-    console.log('result', result.data)
+    const fn = httpsCallable<object, { checkoutToken: string; paymentId: string; smartFieldsKey: string }>(
+      functions, 'createDlocalTransparentPayment'
+    )
+    const result = await fn({
+      paymentId: docRef.id,
+      isExpress: store.answers.isExpress,
+      origin: window.location.origin,
+    })
     checkoutToken.value = result.data.checkoutToken
     paymentId.value = result.data.paymentId
-
     await loadSdk()
     isLoading.value = false
     await nextTick()
@@ -164,10 +206,15 @@ const initSmartFields = async (smartFieldsKey: string) => {
   expirationField.value.mount(expEl)
   cvvField.value.mount(cvvEl)
 
+  let cardInfoCaptured = false
   window.dlocalGo.onInstallmentsChange((options) => {
     dlocalInstallments.value = options
     console.log('dlocalInstallments', dlocalInstallments.value)
-    if (options.length > 0) selectedInstallmentId.value = options[0].id
+    if (options.length > 0) selectedInstallmentId.value = options[0]!.id
+    if (!cardInfoCaptured) {
+      cardInfoCaptured = true
+      posthog.capture('card_info_entered')
+    }
   })
   isSmartFieldsReady.value = true
 }
@@ -183,10 +230,15 @@ const validate = () => {
 }
 
 const handlePayment = async () => {
+  if (window.fbq) {
+    window.fbq('track', 'InitPayment')
+  }
+  posthog.capture('payment_clicked', { method: selectedMethod.value })
   if (!validate()) return
   if (selectedMethod.value === 'credit_card' && !isSmartFieldsReady.value) return
 
   isSubmitting.value = true
+  paymentError.value = ''
   try {
     if (selectedMethod.value === 'credit_card') {
       const tokenResult = await window.dlocalGo.createCardToken(panField.value!, { name: fullName.value })
@@ -221,16 +273,19 @@ const handlePayment = async () => {
       if (result.data.status === 'PAID' || result.data.status === 'PENDING') {
         emit('success', { paymentId: paymentId.value })
       } else {
-        emit('error', 'Pagamento recusado. Verifique os dados e tente novamente.')
+        paymentError.value = t('paymentModal.paymentDeclinedError')
       }
     } else if (selectedMethod.value === 'pix') {
+      const pixRawDoc = cpf.value.replace(/\D/g, '')
+      const pixDocType = pixRawDoc.length > 11 ? 'CNPJ' : 'CPF'
       const fn = httpsCallable<object, { checkoutUrl: string; paymentId: string }>(
         functions, 'createPixPayment'
       )
       const result = await fn({
         email: localEmail.value,
         name: fullName.value,
-        document: cpf.value,
+        document: pixRawDoc,
+        documentType: pixDocType,
         isExpress: store.answers.isExpress,
         origin: window.location.origin,
         paymentId: paymentId.value,
@@ -238,8 +293,15 @@ const handlePayment = async () => {
       if (!result.data.checkoutUrl) throw new Error('No checkout URL received from Pix payment')
       window.location.href = result.data.checkoutUrl
     }
-  } catch (err) {
-    emit('error', err)
+  } catch (err: unknown) {
+    const msg = (err as { message?: string })?.message || t('payment.genericError')
+    if (msg.toLowerCase().includes('document')) {
+      errors.value.cpf = t('paymentModal.invalidDocumentError')
+    } else {
+      paymentError.value = msg.includes('REJECTED') || msg.toLowerCase().includes('declin')
+        ? t('paymentModal.paymentDeclinedError')
+        : msg
+    }
   } finally {
     isSubmitting.value = false
   }
@@ -268,15 +330,37 @@ const priceForFallback = () => {
   return (parseFloat(s.replace('R$ ', '').replace(',', '.')) / 12).toFixed(2).replace('.', ',')
 }
 
+const handleMethodSelect = (method: 'credit_card' | 'pix') => {
+  selectedMethod.value = method
+  posthog.capture('payment_method_selected', { method })
+}
+
+const handleCpfFocus = () => {
+  posthog.capture('cpf_entered')
+}
+
 const close = () => emit('close')
 </script>
 
 <template>
   <Transition name="modal">
-    <div v-if="isOpen"
-      class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 md:p-4 overflow-y-auto">
-      <div class="bg-white w-full max-w-2xl min-h-[400px] my-auto rounded-xl shadow-2xl relative flex flex-col"
-        @click.stop>
+    <div v-if="isOpen" class="fixed inset-0 z-[9999] bg-white overflow-y-auto">
+
+      <!-- Urgency countdown banner — sticky, full width, above scroll content -->
+      <div class="sticky top-0 z-20 w-full bg-red-600 text-white text-xs font-bold px-4 py-2 flex items-center justify-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24"
+          stroke-width="2.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z" />
+        </svg>
+        <span v-if="!isExpired">
+          {{ t('payment.urgency.reserved') }}
+          <span class="font-mono tabular-nums">{{ formatted }}</span>
+        </span>
+        <span v-else>{{ t('payment.urgency.expired') }}</span>
+      </div>
+
+      <div class="w-full min-h-full max-w-2xl mx-auto relative flex flex-col" @click.stop>
 
         <!-- Close Button -->
         <button @click="close"
@@ -297,8 +381,12 @@ const close = () => emit('close')
             <div class="flex-grow pt-1 text-left">
               <h2 class="text-lg md:text-xl font-bold text-gray-800 leading-tight mb-1">{{
                 t('paymentModal.product.name') }}</h2>
-              <span class="text-secondary text-xl md:text-2xl font-extrabold">{{ currentPriceDisplay() }}</span>
-              <p class="text-xs text-secondary/60 font-medium">{{ t('paymentModal.product.priceInfoPreview', {
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-gray-400 line-through text-base">{{ t('payment.summary.originalPrice', { price: PRICE_ORIGINAL }) }}</span>
+                <span class="text-secondary text-xl md:text-2xl font-extrabold">{{ currentPriceDisplay() }}</span>
+                <span class="bg-[var(--color-primary)]/20 border border-[var(--color-primary)] text-text-main text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">{{ t('payment.summary.discount') }}</span>
+              </div>
+              <p class="text-xs text-secondary/60 font-medium mt-0.5">{{ t('paymentModal.product.priceInfoPreview', {
                 price: priceForFallback()
               }) }}</p>
             </div>
@@ -331,7 +419,8 @@ const close = () => emit('close')
 
             <!-- Confirm Email -->
             <div>
-              <label class="block text-sm font-medium text-gray-600 mb-1">{{ t('paymentModal.confirmEmailLabel') }}</label>
+              <label class="block text-sm font-medium text-gray-600 mb-1">{{ t('paymentModal.confirmEmailLabel')
+                }}</label>
               <input v-model="confirmEmail" type="email" :placeholder="t('paymentModal.confirmEmailPlaceholder')"
                 class="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 outline-none focus:border-secondary transition-all text-sm"
                 :class="errors.confirmEmail ? 'border-red-300 bg-red-50' : ''" />
@@ -341,7 +430,8 @@ const close = () => emit('close')
             <!-- CPF -->
             <div>
               <label class="block text-sm font-medium text-gray-600 mb-1">{{ t('paymentModal.cpfLabel') }}</label>
-              <input v-model="cpf" @input="formatCpf" type="text" :placeholder="t('paymentModal.cpfPlaceholder')"
+              <input v-model="cpf" @input="formatCpf" @focus.once="handleCpfFocus" type="text"
+                :placeholder="t('paymentModal.cpfPlaceholder')"
                 class="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 outline-none focus:border-secondary transition-all text-sm"
                 :class="errors.cpf ? 'border-red-300 bg-red-50' : ''" />
               <p v-if="errors.cpf" class="mt-1 text-xs text-red-500">{{ errors.cpf }}</p>
@@ -349,7 +439,7 @@ const close = () => emit('close')
 
             <!-- Payment Method Tabs -->
             <div class="grid grid-cols-2 gap-2 mt-6">
-              <button @click="selectedMethod = 'credit_card'"
+              <button @click="handleMethodSelect('credit_card')"
                 class="flex items-center justify-center p-3 rounded-lg border-2 transition-all gap-2"
                 :class="selectedMethod === 'credit_card' ? 'border-secondary bg-secondary/5 text-secondary' : 'border-gray-100 text-gray-400'">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
@@ -359,7 +449,7 @@ const close = () => emit('close')
                 </svg>
                 <span class="text-xs font-bold">{{ t('paymentModal.paymentMethods.creditCard') }}</span>
               </button>
-              <button @click="selectedMethod = 'pix'"
+              <button @click="handleMethodSelect('pix')"
                 class="flex items-center justify-center p-3 rounded-lg border-2 transition-all gap-2"
                 :class="selectedMethod === 'pix' ? 'border-secondary bg-secondary/5 text-secondary' : 'border-gray-100 text-gray-400'">
                 <div class="w-5 h-5 flex items-center justify-center">
@@ -390,18 +480,21 @@ const close = () => emit('close')
                 <!-- Card Number -->
                 <div>
                   <label class="block text-[11px] font-bold text-gray-400 uppercase mb-2">Número do cartão</label>
-                  <div id="dlocal-pan" class="w-full px-3.5 py-3 bg-white border border-gray-200 rounded-lg min-h-[48px]"></div>
+                  <div id="dlocal-pan"
+                    class="w-full px-3.5 py-3 bg-white border border-gray-200 rounded-lg min-h-[48px]"></div>
                 </div>
 
                 <!-- Expiration + CVV -->
                 <div class="grid grid-cols-3 gap-3">
                   <div class="col-span-2">
                     <label class="block text-[11px] font-bold text-gray-400 uppercase mb-2">Validade</label>
-                    <div id="dlocal-expiration" class="w-full px-3.5 py-3 bg-white border border-gray-200 rounded-lg min-h-[48px]"></div>
+                    <div id="dlocal-expiration"
+                      class="w-full px-3.5 py-3 bg-white border border-gray-200 rounded-lg min-h-[48px]"></div>
                   </div>
                   <div>
                     <label class="block text-[11px] font-bold text-gray-400 uppercase mb-2">CVV</label>
-                    <div id="dlocal-cvv" class="w-full px-3.5 py-3 bg-white border border-gray-200 rounded-lg min-h-[48px]"></div>
+                    <div id="dlocal-cvv"
+                      class="w-full px-3.5 py-3 bg-white border border-gray-200 rounded-lg min-h-[48px]"></div>
                   </div>
                 </div>
 
@@ -446,6 +539,11 @@ const close = () => emit('close')
               </div>
             </div>
 
+            <!-- Payment Error -->
+            <div v-if="paymentError" class="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+              {{ paymentError }}
+            </div>
+
             <!-- Submit -->
             <div class="pt-6 mt-4 border-t border-gray-100">
               <button @click="handlePayment" :disabled="isSubmitting || isLoading || !!initError"
@@ -460,13 +558,19 @@ const close = () => emit('close')
               </button>
             </div>
 
-            <div class="flex items-center justify-center gap-2 text-gray-300 font-black text-[10px] uppercase tracking-widest pt-4">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                <path fill-rule="evenodd"
-                  d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z"
-                  clip-rule="evenodd" />
-              </svg>
-              {{ t('paymentModal.securePayment') }}
+            <div class="mt-5 rounded-xl border border-white/10 bg-white/5 px-4 py-3 flex flex-col items-center gap-2">
+              <div class="flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                  class="w-3.5 h-3.5 text-green-400 shrink-0">
+                  <path fill-rule="evenodd"
+                    d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z"
+                    clip-rule="evenodd" />
+                </svg>
+                <span class="text-sm font-bold uppercase tracking-widest text-gray-400">{{
+                  t('paymentModal.securePayment') }}</span>
+              </div>
+              <span class="text-[11px] text-gray-400 text-center">{{ t('paymentModal.lgpdProtection') }}</span>
+              <p class="text-[11px] text-gray-400 text-center">{{ t('paymentModal.copyright') }}</p>
             </div>
           </div>
         </div>
@@ -478,19 +582,12 @@ const close = () => emit('close')
 <style scoped>
 .modal-enter-active,
 .modal-leave-active {
-  transition: opacity 0.3s ease;
+  transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
-}
-
-.modal-enter-active .bg-white {
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.modal-enter-from .bg-white {
-  transform: scale(0.95) translateY(20px);
+  transform: translateY(16px);
 }
 </style>
